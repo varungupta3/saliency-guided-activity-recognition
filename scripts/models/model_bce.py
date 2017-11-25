@@ -44,8 +44,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ModelBCE(Model):
-    def __init__(self, w, h, batch_size=32, lr=0.001):
-        super(ModelBCE, self).__init__(w, h, batch_size)
+    def __init__(self):
+        super(ModelBCE, self).__init__()
 
         prediction = generator.build()
         

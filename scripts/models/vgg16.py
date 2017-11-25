@@ -102,6 +102,7 @@ def build(inputHeight, inputWidth, input_var):
 
     return net
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Our Pytorch Implementation
 
 
@@ -109,47 +110,51 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-def build():
+class build(nn.Module):
+  def __init__(self):
+    super(build, self).__init__()
 
-    net = nn.Sequential(OrderedDict([
+    self.net = nn.Sequential(OrderedDict([
 
-              ('bgr', RGBtoBGRLayer()),
+              ('bgr', RGBtoBGRLayer()),  # Remember to remove this line as the dataloader will give in NxCxHxW
               ('conv1_1', nn.Conv2d(3, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', F.relu()),
+              ('relu1', nn.ReLU()),
               ('conv1_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', F.relu()),
+              ('relu1', nn.ReLU()),
               ('pool1',  nn.MaxPool2d(2,2)),
 
               ('conv2_1', nn.Conv2d(64, 128, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_1', F.relu()),
+              ('relu2_1', nn.ReLU()),
               ('conv2_2', nn.Conv2d(128, 128, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_2', F.relu()),
+              ('relu2_2', nn.ReLU()),
               ('pool2', nn.MaxPool2d(2,2)),
 
               ('conv3_1', nn.Conv2d(128, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_1', F.relu()),              
+              ('relu3_1', nn.ReLU()),              
               ('conv3_2', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_2', F.relu()),
+              ('relu3_2', nn.ReLU()),
               ('conv3_3', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_3', F.relu()),
+              ('relu3_3', nn.ReLU()),
               ('pool3', nn.MaxPool2d(2,2)),  # Remember to make trainable to false until this layer
 
               ('conv4_1', nn.Conv2d(256, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_1', F.relu()),              
+              ('relu4_1', nn.ReLU()),              
               ('conv4_2', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_2', F.relu()),
+              ('relu4_2', nn.ReLU()),
               ('conv4_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_3', F.relu()),
+              ('relu4_3', nn.ReLU()),
               ('pool4', nn.MaxPool2d(2,2)),
 
               ('conv5_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_1', F.relu()),              
+              ('relu5_1', nn.ReLU()),              
               ('conv5_2', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_2', F.relu()),
+              ('relu5_2', nn.ReLU()),
               ('conv5_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_3', F.relu()),
+              ('relu5_3', nn.ReLU()),
               ('pool5', nn.MaxPool2d(2,2))
               
             ]))
 
-    return net
+  def forward(self,x):
+    x = self.net(x)
+    return x

@@ -49,8 +49,8 @@ class dataloader_obj(torch.utils.data.Dataset):
         
         self.data = data
         #reshape to N*C*H*W
-        self.data = self.data.reshape(self.data.shape[0],3,32,32)
-        self.data = self.data[:,:,::-1,:]
+        self.data = self.data.transpose([0,2,3,1])
+        # self.data = self.data[:,:,::-1,:]
                        
         self.mean_val = mean
         # self.std = param['std']

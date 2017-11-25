@@ -152,32 +152,3 @@ def train():
 if __name__ == "__main__":
     train()
 
-#  Our Pytorch Implementation
-
-
-
-loss_fn = nn.BCELoss()
-bceloss = loss_fn(prediction, target)
-
-def train(epoch):
-    net.train()
-
-    for batch_idx, (data, target) in enumerate(trainloader):
-        if args.cuda:
-            data, target = data.cuda(), target.cuda()
-
-        data, target = Variable(data), Variable(target)
-        target = target.view(-1,)
-        # pdb.set_trace()
-
-        prediction = generator.build()
-        bceloss = loss_fn(output, target)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(trainloader.dataset),
-                100. * batch_idx / len(trainloader), loss.data[0]))

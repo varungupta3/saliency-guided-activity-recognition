@@ -84,8 +84,7 @@ def build(input_height, input_width, input_var):
     generator = build_decoder(encoder)
     return generator
 
-
-
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Our Pytorch Implementation
 
@@ -111,52 +110,56 @@ def build_encoder():
     return encoder
 
 
-def build_decoder():
+class build_decoder(nn.Module):
+  def __init__(self):
+    super(build_decoder, self).__init__()
 
-    net = nn.Sequential(OrderedDict([
+    self.net = nn.Sequential(OrderedDict([
 
               ('uconv5_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_1', F.relu()),              
+              ('relu5_1', nn.ReLU()),              
               ('uconv5_2', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_2', F.relu()),
+              ('relu5_2', nn.ReLU()),
               ('uconv5_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_3', F.relu()),
+              ('relu5_3', nn.ReLU()),
               
               ('upool4', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
 
               ('uconv4_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_1', F.relu()),              
+              ('relu4_1', nn.ReLU()),              
               ('uconv4_2', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_2', F.relu()),
+              ('relu4_2', nn.ReLU()),
               ('uconv4_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_3', F.relu()),
+              ('relu4_3', nn.ReLU()),
               
               ('upool3', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
 
               ('uconv3_3', nn.Conv2d(512, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_1', F.relu()),              
+              ('relu3_1', nn.ReLU()),              
               ('uconv3_2', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_2', F.relu()),
+              ('relu3_2', nn.ReLU()),
               ('uconv3_1', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_3', F.relu()),
+              ('relu3_3', nn.ReLU()),
               
               ('upool2', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')), 
 
               ('uconv2_2', nn.Conv2d(256, 128, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_1', F.relu()),
+              ('relu2_1', nn.ReLU()),
               ('uconv2_1', nn.Conv2d(128, 128, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_2', F.relu()),
+              ('relu2_2', nn.ReLU()),
               ('upool1', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
 
               ('uconv1_2', nn.Conv2d(128, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', F.relu()),
+              ('relu1', nn.ReLU()),
               ('uconv1_1', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', F.relu()),
+              ('relu1', nn.ReLU()),
               ('output', nn.Conv2d(64, 1, kernel_size=3,stride = 1, padding = 1))             
               
             ]))
+  def forward(self,x):
+    x = self.net(x)
+    return x
 
-    return net
 
 
 def build():

@@ -62,36 +62,71 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-def build():
+def build(nn.Module):
+  net = nn.Sequential(OrderedDict([
+                                    ('merge', nn.Conv2d(4, 3, kernel_size=1,stride = 1, padding = 0)),
+                                    ('conv1', nn.Conv2d(3, 32, kernel_size=3,stride = 1, padding = 1)),
+                                    ('relu1', nn.ReLU()),
+                                    ('pool1',  nn.MaxPool2d(4,4)),
 
-    net = nn.Sequential(OrderedDict([
-              ('merge', nn.Conv2d(4, 3, kernel_size=1,stride = 1, padding = 0)),
-              ('conv1', nn.Conv2d(3, 32, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', F.relu()),
-              ('pool1',  nn.MaxPool2d(4,4)),
+                                    ('conv2_1', nn.Conv2d(32, 64, kernel_size=3,stride = 1, padding = 1)),
+                                    ('relu2_1', nn.ReLU()),
+                                    ('conv2_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
+                                    ('relu2_2', nn.ReLU()),
+                                    ('pool2', nn.MaxPool2d(2,2)),
 
-              ('conv2_1', nn.Conv2d(32, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_1', F.relu()),
-              ('conv2_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_2', F.relu()),
-              ('pool2', nn.MaxPool2d(2,2)),
+                                    ('conv3_1', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
+                                    ('relu3_1', nn.ReLU()),
+                                    ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
+                                    ('conv3_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
+                                    ('relu3_2', nn.ReLU())
+                                    ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
+                                    ('pool3', nn.MaxPool2d(2,2)),
 
-              ('conv3_1', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_1', F.relu()),
-              ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
-              ('conv3_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_2', F.relu())
-              ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
-              ('pool3', nn.MaxPool2d(2,2)),
+                                    ('fc4', nn.Linear(12288, 100)),
+                                    ('tanh4' nn.Tanh()),
+                                    ('fc5', nn.Linear(100,2)),
+                                    ('tanh5' nn.Tanh()),
+                                    ('fc6', nn.Linear(2,1)),
+                                    # ('sigmoid6' F.Sigmoid())
+                                                              ]))
+  return F.Sigmoid(net)
 
-              ('fc4', nn.Linear(12288, 100)),
-              ('tanh4' F.Tanh()),
-              ('fc5', nn.Linear(100,2)),
-              ('tanh5' F.Tanh()),
-              ('fc6', nn.Linear(2,1)),
-              ('sigmoid6' F.Sigmoid())
-            ]))
-    return net
+class DiscriminatorNet(nn.Module):
+  def __init__(self):
+    super(DiscriminatorNet, self).__init__()
+    
+    self.net = nn.Sequential(OrderedDict([
+                                            ('merge', nn.Conv2d(4, 3, kernel_size=1,stride = 1, padding = 0)),
+                                            ('conv1', nn.Conv2d(3, 32, kernel_size=3,stride = 1, padding = 1)),
+                                            ('relu1', nn.ReLU()),
+                                            ('pool1',  nn.MaxPool2d(4,4)),
+
+                                            ('conv2_1', nn.Conv2d(32, 64, kernel_size=3,stride = 1, padding = 1)),
+                                            ('relu2_1', nn.ReLU()),
+                                            ('conv2_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
+                                            ('relu2_2', nn.ReLU()),
+                                            ('pool2', nn.MaxPool2d(2,2)),
+
+                                            ('conv3_1', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
+                                            ('relu3_1', nn.ReLU()),
+                                            ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
+                                            ('conv3_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
+                                            ('relu3_2', nn.ReLU())
+                                            ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
+                                            ('pool3', nn.MaxPool2d(2,2)),
+
+                                            ('fc4', nn.Linear(12288, 100)),
+                                            ('tanh4' F.Tanh()),
+                                            ('fc5', nn.Linear(100,2)),
+                                            ('tanh5' F.Tanh()),
+                                            ('fc6', nn.Linear(2,1)),
+                                            # ('sigmoid6' F.Sigmoid())
+                                                                      ]))
+
+  def forward(self,x):
+    x = self.net(x)
+    return F.sigmoid(x)
 
 
 
