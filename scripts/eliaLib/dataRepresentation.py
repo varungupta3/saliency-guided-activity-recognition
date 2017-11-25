@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from enum import Enum
 import scipy.io
+import pdb
 
 
 class InputType(Enum):
@@ -38,7 +39,6 @@ class ImageContainer:
             raise Exception('Unknown state when loading image')
 
     def load(self):
-
         if self.imageType == InputType.image:
             self.data = cv2.cvtColor(cv2.imread(self.filePath, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
             self.state = LoadState.loaded
@@ -46,10 +46,10 @@ class ImageContainer:
             self.data = cv2.cvtColor(cv2.imread(self.filePath, cv2.IMREAD_COLOR), cv2.COLOR_BGR2GRAY)
             self.state = LoadState.loaded
         elif self.imageType == InputType.saliencyMapMatlab:
-            self.data = (scipy.io.loadmat(self.filePath)['I'] * 255).astype(np.uint8)
+            self.data = (scipy.io.loadmat(self.filePath)['image'] * 255).astype(np.uint8)
             self.state = LoadState.loaded
         elif self.imageType == InputType.fixationMapMatlab:
-            self.data = (scipy.io.loadmat(self.filePath)['I']).nonzero()
+            self.data = (scipy.io.loadmat(self.filePath)['image']).nonzero()
             self.state = LoadState.loaded
         elif self.imageType == InputType.empty:
             self.data = None
@@ -86,7 +86,7 @@ class ImageContainer:
                 return cv2.cvtColor(cv2.imdecode(self.data, cv2.IMREAD_COLOR), cv2.COLOR_BGR2GRAY)
         elif self.imageType == InputType.saliencyMapMatlab:
             if self.state == LoadState.unloaded:
-                return (scipy.io.loadmat(self.filePath)['I'] * 255).astype(np.uint8)
+                return (scipy.io.loadmat(self.filePath)['image'] * 255).astype(np.uint8)
             elif self.state == LoadState.loaded:
                 return self.data
             elif self.state == LoadState.loadedCompressed:
@@ -94,7 +94,7 @@ class ImageContainer:
                 return None
         elif self.imageType == InputType.fixationMapMatlab:
             if self.state == LoadState.unloaded:
-                return (scipy.io.loadmat(self.filePath)['I']).astype(np.uint8)
+                return (scipy.io.loadmat(self.filePath)['image']).astype(np.uint8)
             elif self.state == LoadState.loaded:
                 return self.data
             elif self.state == LoadState.loadedCompressed:
@@ -106,18 +106,19 @@ class ImageContainer:
 
 ###############################################################################################
 
-# class Target():
-#     def __init__(self, imagePath, saliencyPath,
-#                  imageState=LoadState.unloaded, imageType=InputType.image,
-#                  saliencyState=LoadState.unloaded, saliencyType=InputType.saliencyMapMatlab):
-#         self.image = ImageContainer(imagePath, imageType, imageState)
-#         self.saliency = ImageContainer(saliencyPath, saliencyType, saliencyState)
+class Target1():
+    def __init__(self, imagePath, saliencyPath,
+                 imageState=LoadState.unloaded, imageType=InputType.image,
+                 saliencyState=LoadState.unloaded, saliencyType=InputType.saliencyMapMatlab):
+        self.image = ImageContainer(imagePath, imageType, imageState)
+        self.saliency = ImageContainer(saliencyPath, saliencyType, saliencyState)
 
 class Target():
     def __init__(self, imagePath, saliencyPath,fixationPath,
                  imageState=LoadState.unloaded, imageType=InputType.image,
                  saliencyState=LoadState.unloaded, saliencyType=InputType.saliencyMapMatlab,
                  fixationState=LoadState.unloaded, fixationType=InputType.fixationMapMatlab):
+
         self.image = ImageContainer(imagePath, imageType, imageState)
         self.saliency = ImageContainer(saliencyPath, saliencyType, saliencyState)
         self.fixation = ImageContainer(fixationPath, fixationType, fixationState)
