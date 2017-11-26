@@ -19,7 +19,7 @@ import pdb
 
 # Other py files imports
 from constants import *
-from models import *
+from models-pytorch import *
 from config import *
 from Salicon_loader import *
 
@@ -89,9 +89,9 @@ pdb.set_trace()
 
 print (" 2.1 --> Building the network with Salgan model")
 
-        # Deploying the generator network model from models.py
+        # Deploying the generator network model from models-pytorch.py
 g_net = Generator()
-        # Deploying the discriminator network model from models.py
+        # Deploying the discriminator network model from models-pytorch.py
 d_net = Discriminator()
 
 BCELoss= nn.BCELoss().cuda()
