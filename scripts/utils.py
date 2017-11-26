@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import cv2
-import theano
-import lasagne
+# import theano
+# import lasagne
 from constants import HOME_DIR
 
 

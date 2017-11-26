@@ -19,7 +19,7 @@ from models.model_bce import ModelBCE
 from utils import *
 
 flag = str(sys.argv[1])
-
+import pdb
 
 def bce_batch_iterator(model, train_data, validation_sample):
     num_epochs = 301
@@ -115,17 +115,17 @@ def train():
     """
     # Load data
     print 'Loading training data...'
-    with open('../saliency-2016-lsun/validationSample240x320.pkl', 'rb') as f:
-    # with open(TRAIN_DATA_DIR, 'rb') as f:
+    # with open('../saliency-/validationSample240x320.pkl', 'rb') as f:
+    with open(TRAIN_DATA_DIR, 'rb') as f:
         train_data = pickle.load(f)
     print '-->done!'
 
     print 'Loading validation data...'
-    with open('../saliency-2016-lsun/validationSample240x320.pkl', 'rb') as f:
-    # with open(VALIDATION_DATA_DIR, 'rb') as f:
+    # with open('../saliency-2016-lsun/validationSample240x320.pkl', 'rb') as f:
+    with open(VAL_DATA_DIR, 'rb') as f:
         validation_data = pickle.load(f)
     print '-->done!'
-
+    pdb.set_trace()
     # Choose a random sample to monitor the training
     num_random = random.choice(range(len(validation_data)))
     validation_sample = validation_data[num_random]

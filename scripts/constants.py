@@ -12,9 +12,9 @@ pathOutputMaps = '/home/autel/Downloads/CIS680Final/Datasets/saliency320x240/'
 pathToPickle = '/home/autel/Downloads/CIS680Final/Datasets/320x240/'
 
 # Path to pickles which contains processed data
-TRAIN_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/fix_trainData.pickle'
-VAL_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/fix_validationData.pickle'
-TEST_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/256x192/testData.pickle'
+TRAIN_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/trainData.pickle'
+VAL_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/validationData.pickle'
+TEST_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/testData.pickle'
 
 # Path to vgg16 pre-trained weights
 PATH_TO_VGG16_WEIGHTS = '/home/autel/Downloads/saliency-salgan-2017/vgg16.pkl'
