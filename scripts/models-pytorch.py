@@ -81,7 +81,7 @@ class Generator(nn.Module):
 
 class Discriminator(nn.Module):
   def __init__(self):
-    super(DiscriminatorNet, self).__init__()
+    super(Discriminator, self).__init__()
     
     self.conv_layers = nn.Sequential(OrderedDict([
                                             ('merge', nn.Conv2d(4, 3, kernel_size=1,stride = 1, padding = 0)),
