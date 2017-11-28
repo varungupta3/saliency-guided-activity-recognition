@@ -30,44 +30,46 @@ class Generator(nn.Module):
     self.decoder = nn.Sequential(OrderedDict([
 
               ('uconv5_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_1', nn.ReLU(inplace=True)),              
+              ('relu5_3', nn.ReLU(inplace=True)),              
               ('uconv5_2', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
               ('relu5_2', nn.ReLU(inplace=True)),
               ('uconv5_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu5_3', nn.ReLU(inplace=True)),
+              ('relu5_1', nn.ReLU(inplace=True)),
               
               ('upool4', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
 
               ('uconv4_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_1', nn.ReLU(inplace=True)),              
+              ('relu4_3', nn.ReLU(inplace=True)),              
               ('uconv4_2', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
               ('relu4_2', nn.ReLU(inplace=True)),
               ('uconv4_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
-              ('relu4_3', nn.ReLU(inplace=True)),
+              ('relu4_1', nn.ReLU(inplace=True)),
               
               ('upool3', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
 
               ('uconv3_3', nn.Conv2d(512, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_1', nn.ReLU(inplace=True)),              
+              ('relu3_3', nn.ReLU(inplace=True)),              
               ('uconv3_2', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
               ('relu3_2', nn.ReLU(inplace=True)),
               ('uconv3_1', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
-              ('relu3_3', nn.ReLU(inplace=True)),
+              ('relu3_1', nn.ReLU(inplace=True)),
               
               ('upool2', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')), 
 
               ('uconv2_2', nn.Conv2d(256, 128, kernel_size=3,stride = 1, padding = 1)),
-              ('relu2_1', nn.ReLU(inplace=True)),
+              ('relu2_2', nn.ReLU(inplace=True)),
               ('uconv2_1', nn.Conv2d(128, 128, kernel_size=3,stride = 1, padding = 1)),
+              ('relu2_1', nn.ReLU(inplace=True)),
 
               ('upool1', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
 
               ('uconv1_2', nn.Conv2d(128, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', nn.ReLU(inplace=True)),
+              ('relu1_2', nn.ReLU(inplace=True)),
               ('uconv1_1', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-              ('relu1', nn.ReLU(inplace=True)),
+              ('relu1_1', nn.ReLU(inplace=True)),
 
-              ('output', nn.Conv2d(64, 1, kernel_size=3,stride = 1, padding = 1)) 
+              ('output', nn.Conv2d(64, 1, kernel_size=1,stride = 1, padding = 0)),
+              ('sigmoid',  nn.Sigmoid()) 
 
             ]))
   def forward(self,x):
@@ -105,11 +107,16 @@ class Discriminator(nn.Module):
 
                                             ]))
 
-    self.fc_layers = nn.Sequential(OrderedDict([('fc4', nn.Linear(12288, 100)),
+    self.fc_layers = nn.Sequential(OrderedDict([
+    											('fc4', nn.Linear(12288, 100)),
                                                 ('tanh4' nn.Tanh()),
                                                 ('fc5', nn.Linear(100,2)),
                                                 ('tanh5' nn.Tanh()),
-                                                ('fc6', nn.Linear(2,1)) ]))
+                                                ('fc6', nn.Linear(2,1)),
+                                                ('sigmoid', nn.Sigmoid())
+
+
+                                                ]))
 
   def forward(self,x):
 
@@ -117,4 +124,4 @@ class Discriminator(nn.Module):
     x = x.view(x.size(0),-1)
     x = self.fc_layers(x)
 
-    return F.sigmoid(x)
+    return x

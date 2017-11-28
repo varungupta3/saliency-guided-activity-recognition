@@ -93,10 +93,10 @@ print (" 2.1 --> Building the network with Salgan model")
 g_net = Generator()
         # Deploying the discriminator network model from models-pytorch.py
 d_net = Discriminator()
-
+		# Content Loss used by the Generator during training.
 BCELoss= nn.BCELoss().cuda()
-#SalganLoss 
-optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay = args.wd) 
+        # Using Adagrad optimizer with initial learning rate of 3e-4 and weight decay of 1e-4 
+optimizer = optim.Adagrad([g_net.parameters(),d_net.parameters()], lr=args.lr, weight_decay = args.wd) # Look into this later
 
 if args.cuda:
     g_net.cuda()
@@ -113,35 +113,63 @@ def adjust_learning_rate(optimizer, epoch):
 def train(epoch):
     net.train()
 
-    for batch_idx, (data, target) in enumerate(trainloader):
+    for batch_idx, (image, true_saliency) in enumerate(trainloader):
         if args.cuda:
-            data, target = data.cuda(), target.cuda()
+            image, true_saliency = image.cuda(), true_saliency.cuda()
             pdb.set_trace()
-        data, target = Variable(data), Variable(target)
+        image, true_saliency = Variable(image), Variable(true_saliency)             
 
+                        # Evaluating the GAN Network
+                    #-----------------------------------------    
+            # Generate the predicted saliency map from the generator network.
+        pred_saliency = g_net(data)
+        pdb.set_trace()
+            # Concatenate the predicted saliency map to the original image so that it can be fed into the discriminator network. RGBS Image = 256 x 192 x 4
+        stacked_image = torch.cat((image,pred_saliency),0)
+            #Feeding the stacked image with saliency map to the discriminator network to get a single probability value that tells us the probability of fooling the network
+        dis_output = d_net(stacked_image)
+
+        # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
+        #------------------------------------------------------------------------------------------------------------
+        if epoch<=15:
+
+                        # Only Generator Training (No Discriminator Training)
+           	# Calculating the Content Loss between predicted saliency map and ground truth saliency map.
+
+           	# Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
+
+            gen_loss = BCELoss(pred_saliency,true_saliency) 
+
+            optimizer.zero_grad()
+            gen_loss.backward()
+            optimizer.step()
+
+        else:
+                                 # Adversarial Training
+        	# During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
+        	
+        	if batch_idx%2==0
+                            # Generator Training  
+                    # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
+                content_loss = BCELoss(pred_saliency,true_saliency)        
+                    # Calculating the Adversarial loss
+                adversarial_loss = torch.log(dis_output)
+                    # The final loss function of the generator i.e. GAN Loss is defined as 
+                gen_loss = (args.alpha*content_loss) - adversarial_loss
+
+                optimizer.zero_grad()
+                gen_loss.backward()
+                optimizer.step()
+
+            else:
+                            # Discriminator Training
+                    # Calculating the discriminator loss which is the negative of adversarial loss and no content loss
+           	    disc_loss = adversarial_loss 
+
+           	    optimizer.zero_grad()
+                disc_loss.backward()
+                optimizer.step() 
         
-        output = net(data)
-        output = output.squeeze()
-        # pdb.set_trace()
-
-        # Prediction for the 100 batch input, reshaped to a (100,36) matrix
-        out = output.view(output.size(0),-1)
-       
-         # For clasification we use the regions in the mask which are 0,1. We extract these corresponding locations from both the predicted mask and the ground truth mask.
-        tar = target.view(target.size(0),-1)
-
-        mask = tar.ne(2)
-        cls_pred = torch.masked_select(out,mask)
-        cls_gt = torch.masked_select(tar,mask)
-        # cls_pred = cls_pred.ge(0.5).type(torch.FloatTensor)
-       
-        # pdb.set_trace()
-        loss = loss_fn(cls_pred, cls_gt)
-        class_loss.append(loss.data[0])
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -153,5 +181,5 @@ def train(epoch):
 for iter in range(1, args.epochs+1):
     adjust_learning_rate(optimizer, iter)
     train(iter)
-    if iter%args.log_interval == 0:        
-        test()
+    # if iter%args.log_interval == 0:        
+    #     test()
