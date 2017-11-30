@@ -19,7 +19,7 @@ import pdb
 
 # Other py files imports
 from constants import *
-from models-pytorch import *
+from models_pytorch import *
 from config import *
 from Salicon_loader import *
 
@@ -69,10 +69,10 @@ if args.cuda:
 # np.save('testmask',testmask)
 
 
-trainimages = np.load('trainimages.npy')
-trainmasks = np.load('trainmask.npy')
-testimages = np.load('testimages.npy')
-testmasks = np.load('testmask.npy')
+trainimages = np.load('../../trainimages.npy')
+trainmasks = np.load('../../trainmask.npy')
+testimages = np.load('../../testimages.npy')
+testmasks = np.load('../../testmask.npy')
 
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
@@ -134,9 +134,9 @@ def train(epoch):
         if epoch<=15:
 
                         # Only Generator Training (No Discriminator Training)
-           	# Calculating the Content Loss between predicted saliency map and ground truth saliency map.
+            # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
 
-           	# Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
+            # Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
 
             gen_loss = BCELoss(pred_saliency,true_saliency) 
 
@@ -146,9 +146,9 @@ def train(epoch):
 
         else:
                                  # Adversarial Training
-        	# During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
-        	
-        	if batch_idx%2==0
+            # During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
+            
+            if batch_idx%2==0:
                             # Generator Training  
                     # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
                 content_loss = BCELoss(pred_saliency,true_saliency)        
@@ -164,9 +164,9 @@ def train(epoch):
             else:
                             # Discriminator Training
                     # Calculating the discriminator loss which is the negative of adversarial loss and no content loss
-           	    disc_loss = adversarial_loss 
+                disc_loss = adversarial_loss 
 
-           	    optimizer.zero_grad()
+                optimizer.zero_grad()
                 disc_loss.backward()
                 optimizer.step() 
         
