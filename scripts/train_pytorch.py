@@ -23,7 +23,6 @@ from models_pytorch import *
 from config import *
 from Salicon_loader import *
 
-
 #-------------------------------------------------------------
 # Argument parsing and exporting torch to cuda.
 args = parser.parse_args()
@@ -69,10 +68,10 @@ if args.cuda:
 # np.save('testmask',testmask)
 
 
-trainimages = np.load('../../trainimages.npy')
-trainmasks = np.load('../../trainmask.npy')
-testimages = np.load('../../testimages.npy')
-testmasks = np.load('../../testmask.npy')
+trainimages = np.load(trainImagesPath)
+trainmasks = np.load(trainMasksPath)
+testimages = np.load(testImagesPath)
+testmasks = np.load(testMasksPath)
 
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
@@ -153,9 +152,9 @@ def train(epoch):
                     # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
                 content_loss = BCELoss(pred_saliency,true_saliency)        
                     # Calculating the Adversarial loss
-                adversarial_loss = torch.log(dis_output)
+                adversarial_loss = -torch.log(dis_output)
                     # The final loss function of the generator i.e. GAN Loss is defined as 
-                gen_loss = (args.alpha*content_loss) - adversarial_loss
+                gen_loss = (args.alpha*content_loss) + adversarial_loss
 
                 optimizer.zero_grad()
                 gen_loss.backward()

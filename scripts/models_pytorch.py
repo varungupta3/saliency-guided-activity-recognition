@@ -8,25 +8,25 @@ class Generator(nn.Module):
   def __init__(self):
     super(Generator, self).__init__()
 
-                # The network architecture for the encoder using VGG16 model weights pretrained on ImageNet data from the pytorch model zoo.
+    # The network architecture for the encoder using VGG16 model weights pretrained on ImageNet data from the pytorch model zoo.
     self.vgg16 = trained_models.vgg16(pretrained=True)
-                # Settting the Pretrained weights of the convolutional layers. vgg16.features.state_dict().keys() will give the 26 parameters (weights and biases of the conv)
+    # Settting the Pretrained weights of the convolutional layers. vgg16.features.state_dict().keys() will give the 26 parameters (weights and biases of the conv)
     model = self.vgg16.features 
-                # Extracting the First 3 convolutional layer and their parameters (weights and bias) to build our encoder model.
+    # Extracting the First 3 convolutional layer and their parameters (weights and bias) to build our encoder model.
     encoder_fixed = nn.Sequential(*list(model.children())[:-14])
-                # Fixing the paramters (weights and biases) of the first three layers
+    # Fixing the paramters (weights and biases) of the first three layers
     for param in encoder_fixed.parameters():
       param.requires_grad = False
-                # Generating the rest of the encoder model by extracting the pretrained paramters(training allowed).
+    # Generating the rest of the encoder model by extracting the pretrained paramters(training allowed).
     encoder_trainable = nn.Sequential(*list(model.children())[-14:])
-                # Combining the two encoder setups to generate the complete architecture with trainable and not trainable parameters.
+    # Combining the two encoder setups to generate the complete architecture with trainable and not trainable parameters.
     total_layers = list(encoder_fixed.children())
     total_layers.extend(list(encoder_trainable.children()))
 
-                # The complete encoder architecture
+    # The complete encoder architecture
     self.encoder = nn.Sequential(*total_layers)
 
-                # The network architecture for the decoder
+    # The network architecture for the decoder
     self.decoder = nn.Sequential(OrderedDict([
 
               ('uconv5_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
@@ -36,7 +36,7 @@ class Generator(nn.Module):
               ('uconv5_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
               ('relu5_1', nn.ReLU(inplace=True)),
               
-              ('upool4', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
+              ('upool4', nn.modules.upsampling.Upsample(scale_factor=2,mode='nearest')),
 
               ('uconv4_3', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
               ('relu4_3', nn.ReLU(inplace=True)),              
@@ -45,7 +45,7 @@ class Generator(nn.Module):
               ('uconv4_1', nn.Conv2d(512, 512, kernel_size=3,stride = 1, padding = 1)),
               ('relu4_1', nn.ReLU(inplace=True)),
               
-              ('upool3', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
+              ('upool3', nn.modules.upsampling.Upsample(scale_factor=2,mode='nearest')),
 
               ('uconv3_3', nn.Conv2d(512, 256, kernel_size=3,stride = 1, padding = 1)),
               ('relu3_3', nn.ReLU(inplace=True)),              
@@ -54,14 +54,14 @@ class Generator(nn.Module):
               ('uconv3_1', nn.Conv2d(256, 256, kernel_size=3,stride = 1, padding = 1)),
               ('relu3_1', nn.ReLU(inplace=True)),
               
-              ('upool2', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')), 
+              ('upool2', nn.modules.upsampling.Upsample(scale_factor=2,mode='nearest')), 
 
               ('uconv2_2', nn.Conv2d(256, 128, kernel_size=3,stride = 1, padding = 1)),
               ('relu2_2', nn.ReLU(inplace=True)),
               ('uconv2_1', nn.Conv2d(128, 128, kernel_size=3,stride = 1, padding = 1)),
               ('relu2_1', nn.ReLU(inplace=True)),
 
-              ('upool1', nn.modules.upsampling.Unpsample(scale_factor=2,mode='nearest')),
+              ('upool1', nn.modules.upsampling.Upsample(scale_factor=2,mode='nearest')),
 
               ('uconv1_2', nn.Conv2d(128, 64, kernel_size=3,stride = 1, padding = 1)),
               ('relu1_2', nn.ReLU(inplace=True)),
@@ -108,7 +108,7 @@ class Discriminator(nn.Module):
                                             ]))
 
     self.fc_layers = nn.Sequential(OrderedDict([
-                      											('fc4', nn.Linear(12288, 100)),
+                                            ('fc4', nn.Linear(12288, 100)),
                                             ('tanh4', nn.Tanh()),
                                             ('fc5', nn.Linear(100,2)),
                                             ('tanh5', nn.Tanh()),

@@ -25,6 +25,11 @@ INPUT_SIZE = (256, 192)
 # Directory to keep snapshots
 DIR_TO_SAVE = 'test'
 
+trainImagesPath = '../../trainimages.npy'
+trainMasksPath = '../../trainmask.npy'
+testImagesPath = '../../testimages.npy'
+testMasksPath = '../../testmask.npy'
+
 #----------------------------------------------------------------------------------------------------------------
 # Yasin's Workspace
 #----------------------------------------------------------------------------------------------------------------
