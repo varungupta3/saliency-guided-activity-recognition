@@ -37,4 +37,6 @@ class Salicon_loader(Dataset):
     def __len__(self):
         #this function define the upper bound of input index
         #it's usually set to the data image number
-        return len(Dataset)
+
+        # TODO : change this to 5000 while testing 
+        return 10000

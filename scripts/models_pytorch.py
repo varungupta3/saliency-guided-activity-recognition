@@ -2,23 +2,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as trained_models
-
+from collections import OrderedDict
 
 class Generator(nn.Module):
   def __init__(self):
     super(Generator, self).__init__()
 
     # The network architecture for the encoder using VGG16 model weights pretrained on ImageNet data from the pytorch model zoo.
-    self.vgg16 = trained_models.vgg16(pretrained=True)
+    vgg16 = trained_models.vgg16(pretrained=True)
     # Settting the Pretrained weights of the convolutional layers. vgg16.features.state_dict().keys() will give the 26 parameters (weights and biases of the conv)
-    model = self.vgg16.features 
+    model = vgg16.features 
     # Extracting the First 3 convolutional layer and their parameters (weights and bias) to build our encoder model.
     encoder_fixed = nn.Sequential(*list(model.children())[:-14])
     # Fixing the paramters (weights and biases) of the first three layers
     for param in encoder_fixed.parameters():
       param.requires_grad = False
     # Generating the rest of the encoder model by extracting the pretrained paramters(training allowed).
-    encoder_trainable = nn.Sequential(*list(model.children())[-14:])
+    encoder_trainable = nn.Sequential(*list(model.children())[-14:-1])
     # Combining the two encoder setups to generate the complete architecture with trainable and not trainable parameters.
     total_layers = list(encoder_fixed.children())
     total_layers.extend(list(encoder_trainable.children()))
@@ -85,7 +85,7 @@ class Discriminator(nn.Module):
   def __init__(self):
     super(Discriminator, self).__init__()
     
-    self.conv_layers = nn.Sequential(OrderedDict([
+    self.conv_layers1 = nn.Sequential(OrderedDict([
                                             ('merge', nn.Conv2d(4, 3, kernel_size=1,stride = 1, padding = 0)),
                                             ('conv1', nn.Conv2d(3, 32, kernel_size=3,stride = 1, padding = 1)),
                                             ('relu1', nn.ReLU(inplace=True)),
@@ -98,12 +98,15 @@ class Discriminator(nn.Module):
                                             ('pool2', nn.MaxPool2d(2,2)),
 
                                             ('conv3_1', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-                                            ('relu3_1', nn.ReLU(inplace=True)),
-                                            ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
+                                            ('relu3_1', nn.ReLU(inplace=True))
+
+                                            ]))
+    self.conv_layers2 = nn.Sequential(OrderedDict([
+                                            # ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
                                             ('conv3_2', nn.Conv2d(64, 64, kernel_size=3,stride = 1, padding = 1)),
-                                            ('relu3_2', nn.ReLU(inplace=True))
-                                            ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
-                                            ('pool3', nn.MaxPool2d(2,2))
+                                            ('relu3_2', nn.ReLU(inplace=True)),
+                                            # ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
+                                            # ('pool3', nn.MaxPool2d(2,2))
 
                                             ]))
 
@@ -117,9 +120,19 @@ class Discriminator(nn.Module):
 
                                                 ]))
 
-  def forward(self,x):
+    self.maxpool = nn.MaxPool2d(2,2)
 
-    x = self.conv_layers(x)
+    # self.weight_norm1 = nn.utils.weight_norm(self.conv_layers1)
+    # self.weight_norm2 = nn.utils.weight_norm(self.conv_layers2)
+    # TODO : Look into adding weight norm layer in discriminator network
+  def forward(self,x):
+    x = self.conv_layers1(x)
+    # x = nn.utils.weight_norm(x)
+    x = self.conv_layers2(x)
+    # x = nn.utils.weight_norm(x)
+    # x = self.weight_norm1(x)
+    # x = self.weight_norm2(x)
+    x = self.maxpool(x)
     x = x.view(x.size(0),-1)
     x = self.fc_layers(x)
 
