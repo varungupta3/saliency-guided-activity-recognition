@@ -38,5 +38,4 @@ class Salicon_loader(Dataset):
         #this function define the upper bound of input index
         #it's usually set to the data image number
 
-        # TODO : change this to 5000 while testing 
-        return 10000
+        return self.data.shape[0]

@@ -111,7 +111,7 @@ class Discriminator(nn.Module):
                                             ]))
 
     self.fc_layers = nn.Sequential(OrderedDict([
-                                            ('fc4', nn.Linear(12288, 100)),
+                                            ('fc4', nn.Linear(12288, 60)),
                                             ('tanh4', nn.Tanh()),
                                             ('fc5', nn.Linear(100,2)),
                                             ('tanh5', nn.Tanh()),
