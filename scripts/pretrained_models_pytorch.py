@@ -23,122 +23,151 @@ class Generator(nn.Module):
     # self.maxpool = nn.MaxPool2d(2,2,return_indices=True)
     # self.maxunpool = nn.MaxUnpool2d(1)
 
+    # ---------------------------------------------------------------------------------------------------------
+    #                               ENCODER ARCHITECTURE
+    # ---------------------------------------------------------------------------------------------------------
   
-  # The complete encoder architecture
   def forward(self, x):
-
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add(bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-
-    x = F.relu(x)
+                         # Conv 1_1
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add(bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
-
+                         # Conv 1_2
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add(bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                         # Pool 1
     x = F.max_pool2d(x,2)
 
+                        # Conv 2_1
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # Conv 2_2
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]),stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
-
+                        # Pool 2
     x = F.max_pool2d(x,2)
 
+                        # Conv 3_1
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # Conv 3_2
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # Conv 3_3
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
-
+                        # Pool 3
     x = F.max_pool2d(x,2)
 
+                        # Conv 4_1
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # Conv 4_2
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # Conv 4_3
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
-
+                        # Pool 4
     x = F.max_pool2d(x,2)
 
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-
-    x = F.relu(x)
+                        # Conv 5_1
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # Conv 5_2
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # Conv 5_3
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
               
     # pdb.set_trace()
-    # The network architecture for the decoder
+    # -------------------------------------------------------------------------------------------------------------
+    #                                        DECODER ARCHITECTURE
+    # -------------------------------------------------------------------------------------------------------------
 
+                         # uConv 5_3
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                         # uConv 5_2
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
+                        # uConv 5_1
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                         # Upool 4
+    x = F.upsample(x, scale_factor=2)
+
+                        # uConv 4_3
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uConv 4_2
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uConv 4_1
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uPool 3
+    x = F.upsample(x, scale_factor=2)
+
+                        # uConv 3_3
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uConv 3_2
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uConv 3_1
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uPool 2
+    x = F.upsample(x, scale_factor=2)
+
+                        # uConv 2_2
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uConv 2_1
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uPool 1
+    x = F.upsample(x, scale_factor=2)
+
+                        # uConv 1_2
+    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
+    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
+    x = F.relu(x)
+                        # uConv 1_1
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.relu(x)
 
-    x = F.upsample_nearest(x, scale_factor=2)
-
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-
-    x = F.upsample_nearest(x, scale_factor=2)
-
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-
-    x = F.upsample_nearest(x, scale_factor=2)
-
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-
-    x = F.upsample_nearest(x, scale_factor=2)
-
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
-    x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 1)
-    x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
-    x = F.relu(x)
+                        # Output to 1 Channel
     x = F.conv2d(x, weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()]), stride = 1, padding = 0)
     x = x.add( bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()]))
     x = F.sigmoid(x)
+    
     return x
 
 
@@ -150,41 +179,52 @@ class Discriminator(nn.Module):
   def forward(self, x):
     pdb.set_trace()
 
+    # Conv 1_1
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 0)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
+    x = F.relu(x)    
+    # Conv 1_2
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.relu(x)
-
+    # Pool1
     x = F.max_pool2d(x,4)
 
+    # Conv 2_1
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.relu(x)
+    # Conv 2_2
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.relu(x)
-
+    # Pool2
     x = F.max_pool2d(x,2)
 
+    # Conv 3_1
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.relu(x)
+    # Weight norm 3_1
     # ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
-
+    # Conv 3_2
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.relu(x)
+    # Weight norm 3_2
     # ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
-
+    # Pool 3
     x = F.max_pool2d(x,2)
 
+    # Fc 4
     x = F.linear(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.tanh(x)
+    # Fc 5
     x = F.linear(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.tanh(x)
+    # Fc 6
     x = F.linear(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.sigmoid(x)
@@ -233,3 +273,5 @@ disc_weights = np.load(discWeightsPath)
 disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
 disc_weight_list_split.sort(reverse=True)
 disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]
+
+pdb.set_trace()

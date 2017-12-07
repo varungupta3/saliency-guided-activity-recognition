@@ -71,7 +71,7 @@ trainimages = np.load(trainImagesPath)
 trainmasks = np.load(trainMasksPath)
 testimages = np.load(testImagesPath)
 testmasks = np.load(testMasksPath)
-
+pdb.set_trace()
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
 trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=True, num_workers=2)
