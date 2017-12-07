@@ -34,38 +34,6 @@ if args.cuda:
 
 # # Salicon Data Processing
 # #-------------------------------------------------------------
-#                 # Data Loaded from pickle files as image containers. 
-# print ('Loading training data...')
-# with open(TRAIN_DATA_DIR, 'rb') as f:
-#     train_data = pickle.load(f)
-# print ('-->done!')
-
-# print ('Loading validation data...')    
-# with open(VAL_DATA_DIR, 'rb') as f:
-#     validation_data = pickle.load(f)
-# print ('-->done!')
-
-#                 # Getting the SALICON image and ground truth fixation maps in the form of a numpy array (list)
-
-# trainimages = []    
-# trainmask = []
-# testimages = []
-# testmask = []
-
-# for idx1 in range(0,len(train_data)):
-#     trainimages.append(train_data[idx1].image.data)
-#     trainmask.append(train_data[idx1].saliency.data)
-
-# for idx2 in range(0,len(validation_data)):
-#     testimages.append(validation_data[idx2].image.data)
-#     testmask.append(validation_data[idx2].saliency.data)
-    
-#                 #  Saving the relevant data - images and saliency maps and loading them for usage
-
-# np.save(trainImagesPath + 'trainimages',trainimages)
-# np.save(trainMasksPath + 'trainmask',trainmask)
-# np.save(testImagesPath + 'testimages',testimages)
-# np.save(testMasksPath + 'testmask',testmask)
 
 trainimages = np.load(trainImagesPath)
 trainmasks = np.load(trainMasksPath)
@@ -104,7 +72,22 @@ if args.cuda:
 # optimizer_gen = optim.Adagrad(trainable_params, lr=args.lr, weight_decay = args.wd) # Look into this later
 # optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
 
+def plot_images(images, true_saliency, pred_saliency):
+	for i in np.random.randint(np.shape(images)[0], size=10):
+		fig = plt.figure(i)
+		ax1 = fig.add_subplot(131)
+		surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
+		ax1.set_title('Image')
+		ax2 = fig.add_subplot(132)
+		surf = ax2.imshow(true_saliency[i,:,:])
+		ax2.set_title('True Saliency')
+		ax3 = fig.add_subplot(133)
+		surf = ax3.imshow(pred_saliency[i,:,:])
+		ax3.set_title('Predicted Saliency')
 
+		# pred_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3))).astype(np.uint8)
+		# true_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3)/255.0)).astype(np.uint8)
+	plt.show()
 
  # Exponential learning rate decay
 def adjust_learning_rate(optimizer, epoch):
@@ -128,8 +111,19 @@ def train(epoch):
                         # Evaluating the GAN Network
                     #-----------------------------------------    
             # Generate the predicted saliency map from the generator network.
-        pred_saliency = g_net(image) 
-        pdb.set_trace()       
+        pred_saliency = g_net(image)
+
+        PLOT_FLAG = args.plot_saliency
+
+        if PLOT_FLAG:
+        	images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
+        	true_saliencies = true_saliency.squeeze().cpu().data.numpy()
+        	pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
+        	plot_images(images, true_saliencies, pred_saliencies)
+        	PLOT_FLAG = False
+
+        pdb.set_trace()
+
             # Concatenate the predicted saliency map to the original image so that it can be fed into the discriminator network. RGBS Image = 256 x 192 x 4
         stacked_image = torch.cat((image,pred_saliency),1)
         
