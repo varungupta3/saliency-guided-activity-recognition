@@ -32,9 +32,6 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-# # Salicon Data Processing
-# #-------------------------------------------------------------
-
 trainimages = np.load(trainImagesPath)
 trainmasks = np.load(trainMasksPath)
 testimages = np.load(testImagesPath)
