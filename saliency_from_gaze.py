@@ -34,9 +34,10 @@ for gaze_file in gaze_files:
 imageDataDir = '../../datasets/GTEA/'
 videoNames = ['Ahmad_American']
 
-noise_params = {'mu':0.6,'sigma':0.3,'size':[100,100]}
+noise_params = {'mu':0.7,'sigma':5,'size':[200,200]}
 
-skip_frequency = 5
+skip_frequency = 100
+saliencies = {}
 
 for videoName in videoNames:
     img_files = glob.glob(imageDataDir + videoName + '/*.jpg')
@@ -46,9 +47,10 @@ for videoName in videoNames:
             continue
 
         img = cv2.imread(img_file)
+        img = img[:,:,::-1]
 
         img_size = img.shape
-        saliency = np.zeros([img_size[0],img_size[1]], dtype=np.float64)
+        saliency = np.zeros([img_size[0],img_size[1],img_size[2]], dtype=np.float64)
         if frame_num+1 in gaze_dict[videoName]:
             for gaze in gaze_dict[videoName][frame_num+1]:
                 x = gaze[0] # Corresponds to column
@@ -64,14 +66,23 @@ for videoName in videoNames:
                     print (xmin, xmax, ymin, ymax)
                     filter_size = [xmax-xmin, ymax-ymin]
                     print 'Filter size : ' , filter_size
-                    sal_noise = gaussian_filter(np.random.randn(filter_size[1],filter_size[0]), 
-                        noise_params['sigma'])
-                    sal_noise = (sal_noise - np.min(sal_noise))/(np.max(sal_noise) - np.min(sal_noise))
-                    print 'Saliency    ; ' , sal_noise.shape
-                    # pdb.set_trace()
-                    saliency[ymin:ymax,xmin:xmax] = sal_noise
+                    sal_map_im = gaussian_filter(img[ymin:ymax, xmin:xmax,:], noise_params['sigma'])
+                    sal_map = sal_map_im.astype(np.float64)
+                    saliency_map = (sal_map - np.min(sal_map))/(np.max(sal_map) - np.min(sal_map))
+                    # sal_noise = gaussian_filter(np.random.randn(filter_size[1],filter_size[0]), 
+                        # noise_params['sigma'])
+                    # sal_noise = (sal_noise - np.min(sal_noise))/(np.max(sal_noise) - np.min(sal_noise))
+                    # print 'Saliency    ; ' , sal_noise.shape
+
+                    saliency[ymin:ymax,xmin:xmax,:] = sal_map_im
+
+                    pdb.set_trace()
 
         saliencies[videoName][frame_num+1] = saliency
-        # pdb.set_trace()
+        pdb.set_trace()
         
     pdb.set_trace()
+
+# The returned saliencies is a dictionary.
+# saliencies['John Doe'][f] gives the saliency map for video 'John Doe' and frame number f which starts from 1.
+# Some videos do not have saliency maps for all frames since fixations are not synchronized well with the image frames
