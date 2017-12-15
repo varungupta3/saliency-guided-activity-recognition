@@ -21,4 +21,4 @@ parser.add_argument('--no-cuda', action='store_true', default=False, help='disab
 parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
 parser.add_argument('--log_interval', type=int, default=4, help='how many batches to wait before logging training status')
 parser.add_argument('--plot_saliency', type=str2bool, default=False, help='boolean to plot true and predicted saliency maps (default: False)')
-
+parser.add_argument('--predict_saliency', type=str2bool, default=False, help='boolean to use true saliency or predict saliency maps (default: False)')

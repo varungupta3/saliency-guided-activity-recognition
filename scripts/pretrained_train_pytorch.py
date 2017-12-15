@@ -32,7 +32,14 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
+
+# # Salicon Data Processing
+# #-------------------------------------------------------------
+
+# trainimages = np.load("../../Cookingdata.npy")
+
 trainimages = np.load(trainImagesPath)
+
 trainmasks = np.load(trainMasksPath)
 testimages = np.load(testImagesPath)
 testmasks = np.load(testMasksPath)
@@ -45,7 +52,7 @@ trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuff
 test_dataloader_obj = Salicon_loader(testimages,testmasks)
 testloader = DataLoader(test_dataloader_obj, batch_size=args.test_batchsize, shuffle=False, num_workers=2)
 
-# pdb.set_trace()
+# pdb.s()
 
 # Choosing a Network Architecture
 # --------------------------------------------------------------
@@ -74,21 +81,22 @@ optimizer_gen = optim.Adagrad(trainable_params, lr=args.lr, weight_decay = args.
 optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
 
 def plot_images(images, true_saliency, pred_saliency):
-	for i in np.random.randint(np.shape(images)[0], size=10):
-		fig = plt.figure(i)
-		ax1 = fig.add_subplot(131)
-		surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
-		ax1.set_title('Image')
-		ax2 = fig.add_subplot(132)
-		surf = ax2.imshow(true_saliency[i,:,:])
-		ax2.set_title('True Saliency')
-		ax3 = fig.add_subplot(133)
-		surf = ax3.imshow(pred_saliency[i,:,:])
-		ax3.set_title('Predicted Saliency')
+    for i in np.random.randint(np.shape(images)[0], size=10):
+    # for i in range(32):
+        fig = plt.figure(i)
+        ax1 = fig.add_subplot(121)
+        surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
+        ax1.set_title('Image')
+        # ax2 = fig.add_subplot(132)
+        # surf = ax2.imshow(true_saliency[i,:,:])
+        # ax2.set_title('True Saliency')
+        ax3 = fig.add_subplot(122)
+        surf = ax3.imshow(pred_saliency[i,:,:])
+        ax3.set_title('Predicted Saliency')
 
-		# pred_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3))).astype(np.uint8)
-		# true_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3)/255.0)).astype(np.uint8)
-	plt.show()
+        # pred_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3))).astype(np.uint8)
+        # true_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3)/255.0)).astype(np.uint8)
+    plt.show()
 
  # Exponential learning rate decay
 def adjust_learning_rate(optimizer, epoch):
@@ -112,16 +120,29 @@ def train(epoch):
                         # Evaluating the GAN Network
                     #-----------------------------------------    
             # Generate the predicted saliency map from the generator network.
+
+        pdb.set_trace()
         pred_saliency = g_net(image)
+
+        
+
+            # Element-wise multiplication with image and saliency map
+
+        # image_fixated = image*(np.repeat(pred_saliency[:,:,:,np.newaxis],3,axis=3))
+         
+
 
         PLOT_FLAG = args.plot_saliency
 
         if PLOT_FLAG:
-        	images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
-        	true_saliencies = true_saliency.squeeze().cpu().data.numpy()
-        	pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
-        	plot_images(images, true_saliencies, pred_saliencies)
-        	PLOT_FLAG = False
+            images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
+            true_saliencies = true_saliency.squeeze().cpu().data.numpy()
+            pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
+            
+            plot_images(images, true_saliencies, pred_saliencies)
+            image_fixated = images*(np.repeat(pred_saliencies[:,:,:,np.newaxis],3,axis=3))
+            pdb.set_trace()
+            PLOT_FLAG = False
 
         pdb.set_trace()
 
@@ -186,11 +207,11 @@ def train(epoch):
 
 for epoch in range(1, args.epochs+1):
 
-	# if epoch <= 15:
+    # if epoch <= 15:
  #        adjust_learning_rate(optimizer_gen, epoch)        
  #    else:
- #    	adjust_learning_rate(optimizer_gen, epoch)
- #    	adjust_learning_rate(optimizer_disc,epoch-15)
+ #      adjust_learning_rate(optimizer_gen, epoch)
+ #      adjust_learning_rate(optimizer_disc,epoch-15)
     train(epoch)
     # if iter%args.log_interval == 0:        
     #     test()
