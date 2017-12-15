@@ -20,7 +20,7 @@ class Salicon_loader(Dataset):
         #for each calling, you could do the image preprocessing, flipping or cropping
         
         img = self.data[index,:,:,:]
-        # img = img[::-1,:,:]
+        img = img[::-1,:,:]
         
         self.mean_val = bgr_mean
         # self.std = np.std(img,axis=0)

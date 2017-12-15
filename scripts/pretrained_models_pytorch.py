@@ -9,10 +9,10 @@ import pdb
 from torch.autograd import Variable
 
 def weight_tensor_from_np(weight):
-  return Variable(torch.from_numpy(weight).cuda())
+  return torch.nn.Parameter(torch.from_numpy(weight).cuda())
 
 def bias_tensor_from_np(bias):
-  return Variable(torch.from_numpy(bias).cuda().view(1,bias.shape[0],1,1))
+  return torch.nn.Parameter(torch.from_numpy(bias).cuda().view(1,bias.shape[0],1,1))
 
 
 

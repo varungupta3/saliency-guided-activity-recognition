@@ -19,12 +19,12 @@ import pdb
 
 # Other py files imports
 from constants import *
-from pretrained_Egonet_pytorch import *
+from pretrained_lstm_feature_extractor import *
 from pretrained_models_pytorch import *
 from config import *
 from Salicon_loader import *
 from dataloader_lstm import *
-import EgoNet
+# import EgoNet
 
 #-------------------------------------------------------------
 # Argument parsing and exporting torch to cuda.
@@ -39,9 +39,9 @@ PLOT_FLAG = args.plot_saliency
 # # Salicon Data Processing
 # #-------------------------------------------------------------
 
-trainimages = np.load("../../Cookingdata.npy")
+# trainimages = np.load("../../Cookingdata.npy")
 
-# trainimages = np.load(trainImagesPath)
+trainimages = np.load(trainImagesPath)
 trainmasks = np.load(trainMasksPath)
 testimages = np.load(testImagesPath)
 testmasks = np.load(testMasksPath)
@@ -59,7 +59,7 @@ testloader = DataLoader(test_dataloader_obj, batch_size=args.test_batchsize, shu
 # Choosing a Network Architecture
 # --------------------------------------------------------------
 
-print (" 2.1 --> Building the network with EgoNet")
+print (" 2.1 --> Building the network for LSTM")
 
 if args.predict_saliency:
 
@@ -149,17 +149,20 @@ def train(epoch):
                 # Reshaping the feature map which is Nx1x1x512 into a vector (Nx512) for passing to LSTM
             feat_vector = feat_pooled.squeeze()
 
+
             pdb.set_trace()
 
+            # feat_vec = [i.unsqueeze(0) for i in feat_vector]
+            feat = feat_vector.unsqueeze(1).float()
                 # LSTM Starts here
-            lstm = nn.LSTM(512,512)
+            lstm = nn.LSTM(512,512).cuda()
                 # hidden states
             # initialize the hidden state.
-            hidden = (Variable(torch.randn(1, 1, 512)),Variable(torch.randn((1, 1, 512))))
+            hidden = (Variable(torch.randn(1, 1, 512).cuda()),Variable(torch.randn(1, 1, 512).cuda()))
 
-            for i in feat_vector:
-                out,hidden = lstm(i.view(1, 1, -1), hidden)
-
+            # for i in feat_vec:
+            #     out,hidden = lstm(i.view(1, 1, -1))
+            out,hidden = lstm(feat,hidden)
 
 
 
