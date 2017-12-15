@@ -34,10 +34,18 @@ for gaze_file in gaze_files:
 imageDataDir = '../../datasets/GTEA/'
 videoNames = ['Ahmad_American']
 
-noise_params = {'mu':0.7,'sigma':5,'size':[200,200]}
+noise_params = {'mu':0.7,'sigma':7,'size':[200,200]}
 
 skip_frequency = 100
 saliencies = {}
+
+gauss_t = np.linspace(-10, 10, 200)
+gauss_bump = np.exp(-0.01*gauss_t**2)
+gauss_bump /= np.trapz(gauss_bump) # normalize the integral to 1
+
+# make a 2-D kernel out of it
+kernel = gauss_bump[:, np.newaxis] * gauss_bump[np.newaxis, :]
+kernel_scaled = (kernel - np.min(kernel))/(np.max(kernel) - np.min(kernel))
 
 for videoName in videoNames:
     img_files = glob.glob(imageDataDir + videoName + '/*.jpg')
@@ -66,9 +74,12 @@ for videoName in videoNames:
                     print (xmin, xmax, ymin, ymax)
                     filter_size = [xmax-xmin, ymax-ymin]
                     print 'Filter size : ' , filter_size
-                    sal_map_im = gaussian_filter(img[ymin:ymax, xmin:xmax,:], noise_params['sigma'])
-                    sal_map = sal_map_im.astype(np.float64)
-                    saliency_map = (sal_map - np.min(sal_map))/(np.max(sal_map) - np.min(sal_map))
+                    saliency_map = kernel_scaled
+                    pdb.set_trace()
+                    sal_map_im = img[ymin:ymax, xmin:xmax,:] * np.repeat(saliency_map[:,:,np.newaxis],3,axis=2)
+                    # sal_map_im = gaussian_filter(np.ones([filter_size[1], filter_size[0], 3],dtype=np.float32)*255., noise_params['sigma'])
+                    # sal_map = sal_map_im.astype(np.float64)
+                    # saliency_map = (sal_map - np.min(sal_map))/(np.max(sal_map) - np.min(sal_map))
                     # sal_noise = gaussian_filter(np.random.randn(filter_size[1],filter_size[0]), 
                         # noise_params['sigma'])
                     # sal_noise = (sal_noise - np.min(sal_noise))/(np.max(sal_noise) - np.min(sal_noise))
