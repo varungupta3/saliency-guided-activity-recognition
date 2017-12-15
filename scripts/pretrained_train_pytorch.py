@@ -72,9 +72,13 @@ if args.cuda:
 
 # pdb.set_trace()
         # Using Adagrad optimizer with initial learning rate of 3e-4 and weight decay of 1e-4 
-# trainable_params  = filter(lambda p: p.requires_grad, g_net.parameters())
-# optimizer_gen = optim.Adagrad(trainable_params, lr=args.lr, weight_decay = args.wd) # Look into this later
-# optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
+trainable_params  = filter(lambda p: p.requires_grad, g_net.parameters())
+pdb.set_trace()
+print ('Generator Params: ', g_net.parameters())
+print ('Trainable generator params: ', trainable_params)
+print ('Discriminator Params: ', d_net.parameters())
+optimizer_gen = optim.Adagrad(trainable_params, lr=args.lr, weight_decay = args.wd) # Look into this later
+optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
 
 def plot_images(images, true_saliency, pred_saliency):
     for i in np.random.randint(np.shape(images)[0], size=10):
@@ -151,7 +155,7 @@ def train(epoch):
 
         # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
         #------------------------------------------------------------------------------------------------------------
-        if epoch<=15:
+        if epoch<=1:
 
                         # Only Generator Training (No Discriminator Training)
             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.

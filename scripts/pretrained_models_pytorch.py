@@ -208,13 +208,20 @@ class Discriminator(nn.Module):
     x = F.relu(x)
                          # Weight norm 3_1
     # ('weight_norm3_1', nn.utils.weight_norm()), # Look into this later
+    # Removing weights of the weight_norm layer
+    disc_weights[disc_weight_list_order.pop()]
+
                          # Conv 3_2
     x = F.conv2d(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]), stride = 1, padding = 1)
     x = x.add( bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
     x = F.relu(x)
                           # Weight norm 3_2
     # ('weight_norm3_2', nn.utils.weight_norm()), # Look into this later
+    # Removing weights of the weight_norm layers
+    disc_weights[disc_weight_list_order.pop()]
+
                           # Pool 3
+
     x = F.max_pool2d(x,2)
                           # Fc 4
     x = F.linear(x, weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()]))
@@ -249,4 +256,3 @@ disc_weights = np.load(discWeightsPath)
 disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
 disc_weight_list_split.sort(reverse=True)
 disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]
-
