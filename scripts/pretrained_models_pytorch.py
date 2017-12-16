@@ -8,11 +8,11 @@ import numpy as np
 import pdb
 from torch.autograd import Variable
 
-def weight_tensor_from_np(weight):
-  return torch.nn.Parameter(torch.from_numpy(weight).cuda())
+def weight_tensor_from_np(weight,gradflag = True):
+  return torch.nn.Parameter(torch.from_numpy(weight).cuda(),requires_grad=gradflag)
 
-def bias_tensor_from_np(bias):
-  return torch.nn.Parameter(torch.from_numpy(bias).cuda().view(1,bias.shape[0],1,1))
+def bias_tensor_from_np(bias,gradflag = True):
+  return torch.nn.Parameter(torch.from_numpy(bias).cuda().view(1,bias.shape[0],1,1),requires_grad=gradflag)
 
 
 
@@ -21,28 +21,28 @@ class Generator(nn.Module):
     super(Generator, self).__init__()
 
                             # Conv 1_1
-    self.W1_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b1_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W1_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b1_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
                             # Conv 1_2
-    self.W1_2 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b1_2 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W1_2 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b1_2 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
 
                             # Conv 2_1
-    self.W2_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b2_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W2_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b2_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
                             # Conv 2_2
-    self.W2_2 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b2_2 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W2_2 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b2_2 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
 
                             # Conv 3_1
-    self.W3_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b3_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W3_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b3_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
                             # Conv 3_2
-    self.W3_2 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b3_2 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W3_2 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b3_2 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
                             # Conv 3_3
-    self.W3_3 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
-    self.b3_3 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
+    self.W3_3 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
+    self.b3_3 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
 
                             # Conv 4_1
     self.W4_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()])
@@ -287,12 +287,12 @@ class Discriminator(nn.Module):
                             # Conv 3_1
     self.W2_1 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
     self.b2_1 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
-    # Removing Weight norm layer weights
+                        # Removing Weight norm layer weights
     disc_weights[disc_weight_list_order.pop()]
                             # Conv 3_2
     self.W2_2 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
     self.b2_2 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
-    # Removing Weight norm layer weights
+                        # Removing Weight norm layer weights
     disc_weights[disc_weight_list_order.pop()]
 
                             # FC 4
@@ -355,10 +355,6 @@ class Discriminator(nn.Module):
     x = x.add(self.b6)
     x = F.sigmoid(x)
     return x   
-
-    # self.weight_norm1 = nn.utils.weight_norm(self.conv_layers1)
-    # self.weight_norm2 = nn.utils.weight_norm(self.conv_layers2)
-    # TODO : Look into adding weight norm layer in discriminator network
 
 #pre-define weights and biases
 gen_weights = np.load(genWeightsPath)

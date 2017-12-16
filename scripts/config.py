@@ -23,3 +23,4 @@ parser.add_argument('--log_interval', type=int, default=4, help='how many batche
 
 parser.add_argument('--plot_saliency', type=str2bool, default=False, help='boolean to plot true and predicted saliency maps (default: False)')
 parser.add_argument('--predict_saliency', type=str2bool, default=False, help='boolean to use true saliency or predict saliency maps (default: False)')
+
