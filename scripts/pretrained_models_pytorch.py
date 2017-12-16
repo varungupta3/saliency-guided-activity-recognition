@@ -19,7 +19,10 @@ def bias_tensor_from_np(bias,gradflag = True):
 class Generator(nn.Module):
   def __init__(self):
     super(Generator, self).__init__()
-
+    gen_weights = np.load(genWeightsPath)
+    gen_weight_list_split = [int(i.split('_')[1]) for i in gen_weights.keys()]
+    gen_weight_list_split.sort(reverse=True)
+    gen_weight_list_order = ["arr_" + str(i) for i in gen_weight_list_split]
                             # Conv 1_1
     self.W1_1 = weight_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
     self.b1_1 = bias_tensor_from_np(gen_weights[gen_weight_list_order.pop()],False)
@@ -267,9 +270,14 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
+
   def __init__(self):
     super(Discriminator, self).__init__()
 
+    disc_weights = np.load(discWeightsPath)
+    disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
+    disc_weight_list_split.sort(reverse=True)
+    disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]
                              # Conv 1_1
     self.W1_1 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
     self.b1_1 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
@@ -360,13 +368,13 @@ class Discriminator(nn.Module):
     return x   
 
 #pre-define weights and biases
-gen_weights = np.load(genWeightsPath)
-gen_weight_list_split = [int(i.split('_')[1]) for i in gen_weights.keys()]
-gen_weight_list_split.sort(reverse=True)
-gen_weight_list_order = ["arr_" + str(i) for i in gen_weight_list_split]
+# gen_weights = np.load(genWeightsPath)
+# gen_weight_list_split = [int(i.split('_')[1]) for i in gen_weights.keys()]
+# gen_weight_list_split.sort(reverse=True)
+# gen_weight_list_order = ["arr_" + str(i) for i in gen_weight_list_split]
 
 
-disc_weights = np.load(discWeightsPath)
-disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
-disc_weight_list_split.sort(reverse=True)
-disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]
+# disc_weights = np.load(discWeightsPath)
+# disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
+# disc_weight_list_split.sort(reverse=True)
+# disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]

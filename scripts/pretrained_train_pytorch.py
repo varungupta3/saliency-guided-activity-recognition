@@ -60,7 +60,9 @@ trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuff
 print (" 2.1 --> Building the network with Salgan model")
 
         # Deploying the generator network model from models-pytorch.py
+g1_net = Generator()
 g_net = Generator()
+#g_net.load_state_dict(torch.load('gen_model.pt'))
         # Deploying the discriminator network model from models-pytorch.py
 d_net = Discriminator()
         # Content Loss used by the Generator during training.
