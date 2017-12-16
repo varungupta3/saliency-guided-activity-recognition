@@ -33,17 +33,20 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 
+
 # # Salicon Data Processing
 # #-------------------------------------------------------------
 
-# trainimages = np.load("../../Cookingdata.npy")
+trainimages = np.load("../../Cookingdata.npy")
+# trainmasks = np.load("../../Cookingdata_masks.npy")
 
 trainimages = np.load(trainImagesPath)
-
 trainmasks = np.load(trainMasksPath)
 testimages = np.load(testImagesPath)
 testmasks = np.load(testMasksPath)
+
 # pdb.set_trace()
+
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
 trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=True, num_workers=2)
@@ -51,8 +54,6 @@ trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuff
     # Load Testing Data via dataloader object (Salicon_loader.py).
 test_dataloader_obj = Salicon_loader(testimages,testmasks)
 testloader = DataLoader(test_dataloader_obj, batch_size=args.test_batchsize, shuffle=False, num_workers=2)
-
-# pdb.s()
 
 # Choosing a Network Architecture
 # --------------------------------------------------------------
@@ -62,23 +63,23 @@ print (" 2.1 --> Building the network with Salgan model")
         # Deploying the generator network model from models-pytorch.py
 g_net = Generator()
         # Deploying the discriminator network model from models-pytorch.py
-# d_net = Discriminator()
+d_net = Discriminator()
         # Content Loss used by the Generator during training.
-BCELoss= nn.MSELoss().cuda()
+BCELoss= nn.BCELoss().cuda()
 
 if args.cuda:
     g_net.cuda()
-    # d_net.cuda()
+    d_net.cuda()
 
 # pdb.set_trace()
         # Using Adagrad optimizer with initial learning rate of 3e-4 and weight decay of 1e-4 
-trainable_params  = filter(lambda p: p.requires_grad, g_net.parameters())
+gen_trainable_params  = filter(lambda p: p.requires_grad, g_net.parameters())
 # pdb.set_trace()
-print ('Generator Params: ', g_net.parameters())
-print ('Trainable generator params: ', trainable_params)
+# print ('Generator Params: ', g_net.parameters())
+# print ('Trainable generator params: ', trainable_params)
 # print ('Discriminator Params: ', d_net.parameters())
-optimizer_gen = optim.Adagrad(trainable_params, lr=args.lr, weight_decay = args.wd) # Look into this later
-# optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
+optimizer_gen = optim.Adagrad(gen_trainable_params, lr=args.lr, weight_decay = args.wd) # Look into this later
+optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
 
 def plot_images(images, true_saliency, pred_saliency):
     for i in np.random.randint(np.shape(images)[0], size=10):
@@ -108,7 +109,7 @@ def adjust_learning_rate(optimizer, epoch):
 
 def train(epoch):
     g_net.train()
-    # d_net.train()
+    d_net.train()
 
     for batch_idx, (image, true_saliency) in enumerate(trainloader):
         if args.cuda:
@@ -123,17 +124,10 @@ def train(epoch):
 
         # pdb.set_trace()
         pred_saliency = g_net(image)
+        pred_saliency = pred_saliency.squeeze()           
 
-        
-
-            # Element-wise multiplication with image and saliency map
-
-        # image_fixated = image*(np.repeat(pred_saliency[:,:,:,np.newaxis],3,axis=3))
-         
-
-
+               
         PLOT_FLAG = args.plot_saliency
-
         if PLOT_FLAG:
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
             true_saliencies = true_saliency.squeeze().cpu().data.numpy()
@@ -142,16 +136,13 @@ def train(epoch):
             plot_images(images, true_saliencies, pred_saliencies)
             image_fixated = images*(np.repeat(pred_saliencies[:,:,:,np.newaxis],3,axis=3))
             pdb.set_trace()
-            PLOT_FLAG = False
-
-        
+            PLOT_FLAG = False        
 
             # Concatenate the predicted saliency map to the original image so that it can be fed into the discriminator network. RGBS Image = 256 x 192 x 4
         # stacked_image = torch.cat((image,pred_saliency),1)
         
             #Feeding the stacked image with saliency map to the discriminator network to get a single probability value that tells us the probability of fooling the network
-        # dis_output = d_net(stacked_image)
-        # pdb.set_trace()
+        
 
         # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
         #------------------------------------------------------------------------------------------------------------
@@ -161,11 +152,11 @@ def train(epoch):
             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
 
             # Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
-            # pdb.set_trace()
-            true_saliency = Variable(torch.ones(pred_saliency.size()).cuda())
+            # pdb.set_trace()            
 
-            gen_loss = BCELoss(pred_saliency.squeeze(),true_saliency) 
-            pdb.set_trace()
+            # true_saliency = Variable(torch.ones(pred_saliency.size()).cuda())
+            gen_loss = BCELoss(pred_saliency,true_saliency/255.0) 
+            # pdb.set_trace()
             optimizer_gen.zero_grad()
             gen_loss.backward()
             optimizer_gen.step()
