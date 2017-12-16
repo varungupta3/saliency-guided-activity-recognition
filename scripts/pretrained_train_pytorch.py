@@ -60,11 +60,12 @@ trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuff
 print (" 2.1 --> Building the network with Salgan model")
 
         # Deploying the generator network model from models-pytorch.py
-g1_net = Generator()
-g_net = Generator()
-#g_net.load_state_dict(torch.load('gen_model.pt'))
+# g1_net = Generator()
+g_net = torch.load('../gen_model.pt')
+d_net = torch.load('../disc_model.pt')
+# g_net.load_state_dict(torch.load('gen_model.pt'))
         # Deploying the discriminator network model from models-pytorch.py
-d_net = Discriminator()
+# d_net = Discriminator()f
         # Content Loss used by the Generator during training.
 BCELoss= nn.BCELoss().cuda()
 
@@ -83,13 +84,13 @@ def plot_images(images, true_saliency, pred_saliency):
     for i in np.random.randint(np.shape(images)[0], size=10):
     # for i in range(32):
         fig = plt.figure(i)
-        ax1 = fig.add_subplot(121)
+        ax1 = fig.add_subplot(131)
         surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
         ax1.set_title('Image')
-        # ax2 = fig.add_subplot(132)
-        # surf = ax2.imshow(true_saliency[i,:,:])
-        # ax2.set_title('True Saliency')
-        ax3 = fig.add_subplot(122)
+        ax2 = fig.add_subplot(132)
+        surf = ax2.imshow(true_saliency[i,:,:])
+        ax2.set_title('True Saliency')
+        ax3 = fig.add_subplot(133)
         surf = ax3.imshow(pred_saliency[i,:,:])
         ax3.set_title('Predicted Saliency')
 
