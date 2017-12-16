@@ -4,7 +4,6 @@ import glob
 import cv2
 import numpy as np
 import pdb
-from scipy.ndimage.filters import gaussian_filter
 
 gazeDataDir = '../../datasets/GTEA/gaze/'
 # gazeDataPath = 'Ahmed_American.txt'
@@ -77,14 +76,7 @@ for videoName in videoNames:
                     saliency_map = kernel_scaled
                     pdb.set_trace()
                     sal_map_im = img[ymin:ymax, xmin:xmax,:] * np.repeat(saliency_map[:,:,np.newaxis],3,axis=2)
-                    # sal_map_im = gaussian_filter(np.ones([filter_size[1], filter_size[0], 3],dtype=np.float32)*255., noise_params['sigma'])
-                    # sal_map = sal_map_im.astype(np.float64)
-                    # saliency_map = (sal_map - np.min(sal_map))/(np.max(sal_map) - np.min(sal_map))
-                    # sal_noise = gaussian_filter(np.random.randn(filter_size[1],filter_size[0]), 
-                        # noise_params['sigma'])
-                    # sal_noise = (sal_noise - np.min(sal_noise))/(np.max(sal_noise) - np.min(sal_noise))
-                    # print 'Saliency    ; ' , sal_noise.shape
-
+                    
                     saliency[ymin:ymax,xmin:xmax,:] = sal_map_im
 
                     pdb.set_trace()
