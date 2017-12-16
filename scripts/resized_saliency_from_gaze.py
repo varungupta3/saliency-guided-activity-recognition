@@ -8,7 +8,6 @@ from constants import *
 
 # gazeDataPath = 'Ahmed_American.txt'
 gaze_files = glob.glob(gazeDataDir + '*.txt')
-
 gaze_dict = {}
 
 def adjust_gaze(x,y):
@@ -101,7 +100,7 @@ for videoName in videoNames:
 
             # resized_img = cv2.resize(img, (256,192))
             # resized_saliency_img = cv2.resize(saliency_img, (256,192))
-            resized_saliency = cv2.resize(saliency, (256,192))
+            # resized_saliency = cv2.resize(saliency, (256,192))
 
             trainimages.append(img)
             trainmask.append(saliency)
@@ -111,7 +110,7 @@ for videoName in videoNames:
         saliencies[videoName][frame_num+1] = saliency
         # pdb.set_trace()
     # pdb.set_trace()
-# pdb.set_trace()
+pdb.set_trace()
 np.save(trainImagesPath,trainimages)
 np.save(trainMasksPath,trainmask)
 np.save(trainSaliencyImagesPath,trainsaliencyimages)

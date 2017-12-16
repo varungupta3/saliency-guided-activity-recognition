@@ -110,4 +110,4 @@ genWeightsPath = "../../../datasets/gen_modelWeights0090.npz"
 discWeightsPath = "../../../datasets/discrim_modelWeights0090.npz"
 
 gazeDataDir = '../../../datasets/GTEA/gaze/'
-imageDataDir = '../../../datasets/GTEA/'
+imageDataDir = '../../../datasets/'

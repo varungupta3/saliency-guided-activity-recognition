@@ -212,3 +212,8 @@ for epoch in range(1, args.epochs+1):
     train(epoch)
     # if iter%args.log_interval == 0:        
     #     test()
+
+torch.save(g_net,'gen_model.pt')
+torch.save(d_net,'disc_model.pt')
+# g_net = torch.load('gen_model.pt')
+# d_net = torch.load('disc_model.pt')
