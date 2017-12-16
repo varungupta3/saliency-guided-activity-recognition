@@ -141,6 +141,7 @@ def train(epoch):
         # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
         #------------------------------------------------------------------------------------------------------------
         if epoch<=2:
+            print ('Generator Training')
 
                         # Only Generator Training (No Discriminator Training)
             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
@@ -160,10 +161,11 @@ def train(epoch):
 
         else:
                                  # Adversarial Training
+            print ('Adversarial Training')
             # During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
             dis_output = d_net(stacked_image)
             # pdb.set_trace()
-            if batch_idx%2==0:
+            if (batch_idx%2)==0:
                             # Generator Training  
                     # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
                 content_loss = BCELoss(pred_saliency,true_saliency)        
@@ -177,7 +179,7 @@ def train(epoch):
                 optimizer_gen.step()
 
                 if batch_idx % args.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tGenerator Loss: {:.6f}'.format(
                     epoch, batch_idx * len(image), len(trainloader.dataset),
                     100. * batch_idx / len(trainloader), gen_loss.data[0]))
 
@@ -191,7 +193,7 @@ def train(epoch):
                 optimizer_disc.step()
 
                 if batch_idx % args.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tDiscriminator Loss: {:.6f}'.format(
                     epoch, batch_idx * len(image), len(trainloader.dataset),
                     100. * batch_idx / len(trainloader), disc_loss.data[0])) 
         
