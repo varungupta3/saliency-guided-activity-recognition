@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='SALGAN - Pytorch')
 parser.add_argument('--batch_size', type=int, default=32, help='input batch size for training (default: 32)')
 parser.add_argument('--test_batchsize', type=int, default=32, help='input batch size for testing (default: 32)')
 
-parser.add_argument('--epochs', type=int, default=20, help='number of epochs to train (default: 20)')
+parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 20)')
 
 parser.add_argument('--lr', type=float, default=3e-4, help='learning rate (default: 0.0003)')
 parser.add_argument('--min_lr', type=float, default=1e-5, help='minimum learning rate (default: 0.00001)')
