@@ -37,15 +37,13 @@ if args.cuda:
 # # Salicon Data Processing
 # #-------------------------------------------------------------
 
-trainimages = np.load("../../Cookingdata.npy")
+# trainimages = np.load("../../Cookingdata.npy")
 # trainmasks = np.load("../../Cookingdata_masks.npy")
 
 trainimages = np.load(trainImagesPath)
 trainmasks = np.load(trainMasksPath)
 testimages = np.load(testImagesPath)
 testmasks = np.load(testMasksPath)
-
-# pdb.set_trace()
 
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
@@ -71,13 +69,10 @@ if args.cuda:
     g_net.cuda()
     d_net.cuda()
 
-# pdb.set_trace()
+
         # Using Adagrad optimizer with initial learning rate of 3e-4 and weight decay of 1e-4 
 gen_trainable_params  = filter(lambda p: p.requires_grad, g_net.parameters())
-# pdb.set_trace()
-# print ('Generator Params: ', g_net.parameters())
-# print ('Trainable generator params: ', trainable_params)
-# print ('Discriminator Params: ', d_net.parameters())
+
 optimizer_gen = optim.Adagrad(gen_trainable_params, lr=args.lr, weight_decay = args.wd) # Look into this later
 optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
 
@@ -114,19 +109,15 @@ def train(epoch):
     for batch_idx, (image, true_saliency) in enumerate(trainloader):
         if args.cuda:
             image, true_saliency = image.cuda(), true_saliency.cuda()
-            # pdb.set_trace()
+        
         image = image.squeeze()
-        image, true_saliency = Variable(image), Variable(true_saliency)             
+        image, true_saliency = Variable(image), Variable(true_saliency/255.0)             
 
                         # Evaluating the GAN Network
                     #-----------------------------------------    
-            # Generate the predicted saliency map from the generator network.
-
-        # pdb.set_trace()
+            # Generate the predicted saliency map from the generator network.      
         pred_saliency = g_net(image)
-        pred_saliency = pred_saliency.squeeze()           
 
-               
         PLOT_FLAG = args.plot_saliency
         if PLOT_FLAG:
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
@@ -139,23 +130,23 @@ def train(epoch):
             PLOT_FLAG = False        
 
             # Concatenate the predicted saliency map to the original image so that it can be fed into the discriminator network. RGBS Image = 256 x 192 x 4
-        # stacked_image = torch.cat((image,pred_saliency),1)
+        stacked_image = torch.cat((image,pred_saliency),1)
         
+        pred_saliency = pred_saliency.squeeze() 
+
             #Feeding the stacked image with saliency map to the discriminator network to get a single probability value that tells us the probability of fooling the network
         
 
         # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
         #------------------------------------------------------------------------------------------------------------
-        if epoch<=15:
+        if epoch<=2:
 
                         # Only Generator Training (No Discriminator Training)
             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
 
             # Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
-            # pdb.set_trace()            
-
-            # true_saliency = Variable(torch.ones(pred_saliency.size()).cuda())
-            gen_loss = BCELoss(pred_saliency,true_saliency/255.0) 
+                      
+            gen_loss = BCELoss(pred_saliency,true_saliency) 
             # pdb.set_trace()
             optimizer_gen.zero_grad()
             gen_loss.backward()
@@ -170,13 +161,13 @@ def train(epoch):
                                  # Adversarial Training
             # During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
             dis_output = d_net(stacked_image)
-            
+            # pdb.set_trace()
             if batch_idx%2==0:
                             # Generator Training  
                     # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
-                content_loss = BCELoss(pred_saliency.squeeze(),true_saliency)        
+                content_loss = BCELoss(pred_saliency,true_saliency)        
                     # Calculating the Adversarial loss
-                adversarial_loss = -torch.log(dis_output)
+                adversarial_loss = torch.mean(-torch.log(dis_output))
                     # The final loss function of the generator i.e. GAN Loss is defined as 
                 gen_loss = (args.alpha*content_loss) + adversarial_loss
 
@@ -184,14 +175,24 @@ def train(epoch):
                 gen_loss.backward()
                 optimizer_gen.step()
 
+                if batch_idx % args.log_interval == 0:
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(image), len(trainloader.dataset),
+                    100. * batch_idx / len(trainloader), gen_loss.data[0]))
+
             else:
                             # Discriminator Training
                     # Calculating the discriminator loss which is the negative of adversarial loss and no content loss
-                disc_loss = torch.log(dis_output)
+                disc_loss = torch.mean(torch.log(dis_output))
 
                 optimizer_disc.zero_grad()
                 disc_loss.backward()
-                optimizer_disc.step() 
+                optimizer_disc.step()
+
+                if batch_idx % args.log_interval == 0:
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(image), len(trainloader.dataset),
+                    100. * batch_idx / len(trainloader), disc_loss.data[0])) 
         
 
         

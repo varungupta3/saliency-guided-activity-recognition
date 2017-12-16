@@ -285,13 +285,13 @@ class Discriminator(nn.Module):
     self.b2_2 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
 
                             # Conv 3_1
-    self.W2_1 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
-    self.b2_1 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
+    self.W3_1 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
+    self.b3_1 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
                         # Removing Weight norm layer weights
     disc_weights[disc_weight_list_order.pop()]
                             # Conv 3_2
-    self.W2_2 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
-    self.b2_2 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
+    self.W3_2 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
+    self.b3_2 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
                         # Removing Weight norm layer weights
     disc_weights[disc_weight_list_order.pop()]
 
@@ -307,7 +307,7 @@ class Discriminator(nn.Module):
     
     
   def forward(self, x):
-    pdb.set_trace()
+    
 
                          # Conv 1_1
     x = F.conv2d(x,self.W1_1, stride = 1, padding = 0)
@@ -341,18 +341,21 @@ class Discriminator(nn.Module):
     x = F.relu(x)                          
                           # Pool 3
     x = F.max_pool2d(x,2)
+    # pdb.set_trace()
+
+    x = x.view(x.size(0), -1)
 
                           # Fc 4
-    x = F.linear(x,self.W4)
-    x = x.add(self.b4)
+    x = F.linear(x,torch.t(self.W4),bias=self.b4.view(-1))
+    # x = x.add(self.b4)
     x = F.tanh(x)
                           # Fc 5
-    x = F.linear(x,self.W5)
-    x = x.add(self.b5)
+    x = F.linear(x,torch.t(self.W5),bias=self.b5.view(-1))
+    # x = x.add(self.b5)
     x = F.tanh(x)
                           # Fc 6
-    x = F.linear(x,self.W6)
-    x = x.add(self.b6)
+    x = F.linear(x,torch.t(self.W6),bias=self.b6.view(-1))
+    # x = x.add(self.b6)
     x = F.sigmoid(x)
     return x   
 
