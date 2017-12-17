@@ -46,7 +46,7 @@ trainmasks = np.load(trainMasksPath)
 
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
-trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=False, num_workers=2)
+trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=True, num_workers=2)
   
     # Load Testing Data via dataloader object (Salicon_loader.py).
 # test_dataloader_obj = Salicon_loader(testimages,testmasks)
@@ -196,7 +196,7 @@ def train(epoch):
                 gen_loss = (args.alpha*content_loss) + disc_loss
 
                 contentloss.append(content_loss.data[0])
-                discrimloss.append(adversarial_loss.data[0])
+                discrimloss.append(disc_loss.data[0])
 
                 optimizer_gen.zero_grad()
                 gen_loss.backward()
@@ -205,14 +205,14 @@ def train(epoch):
                 if batch_idx % args.log_interval == 0:
                     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tContent Loss: {:.6f}\tDiscriminator Loss: {:.6f}'.format(
                     epoch, batch_idx * len(image), len(trainloader.dataset),
-                    100. * batch_idx / len(trainloader), content_loss.data[0]), disc_loss.data[0])
+                    100. * batch_idx / len(trainloader), content_loss.data[0], disc_loss.data[0]))
 
             else:
                             # Discriminator Training
                     # Calculating the discriminator loss which is the negative of adversarial loss and no content loss
                 disc_loss = torch.mean(torch.log(dis_output))
                 
-                discrimloss.append(adversarial_loss.data[0])
+                discrimloss.append(disc_loss.data[0])
 
                 optimizer_disc.zero_grad()
                 disc_loss.backward()
