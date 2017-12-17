@@ -60,6 +60,7 @@ trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuff
 print (" 2.1 --> Building the network with Salgan model")
 
         # Deploying the generator network model from models-pytorch.py
+
 # g1_net = Generator()
 # g_net = torch.load('../gen_model_epoch10.pt')
 # d_net = torch.load('../disc_model_epoch10.pt')
@@ -67,9 +68,10 @@ print (" 2.1 --> Building the network with Salgan model")
 g_net = torch.load('../gen_model_epoch30.pt')
 d_net = torch.load('../disc_model_epoch30.pt')
 
+
 # g_net.load_state_dict(torch.load('gen_model.pt'))
         # Deploying the discriminator network model from models-pytorch.py
-# d_net = Discriminator()f
+# d_net = Discriminator()
         # Content Loss used by the Generator during training.
 BCELoss= nn.BCELoss().cuda()
 
@@ -155,7 +157,9 @@ def train(epoch):
         # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
         #------------------------------------------------------------------------------------------------------------
         if epoch<=10:
+
             
+
 
                         # Only Generator Training (No Discriminator Training)
             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
@@ -224,10 +228,15 @@ for epoch in range(1, args.epochs+1):
  #      adjust_learning_rate(optimizer_gen, epoch)
  #      adjust_learning_rate(optimizer_disc,epoch-15)
     train(epoch)
+    if epoch == 10:
+        torch.save(g_net,'gen_model_epoch10.pt')
+        torch.save(d_net,'disc_model_epoch10.pt')
+
+
     # if iter%args.log_interval == 0:        
     #     test()
 
-torch.save(g_net,'gen_model.pt')
-torch.save(d_net,'disc_model.pt')
+torch.save(g_net,'gen_model_epoch30.pt')
+torch.save(d_net,'disc_model_epoch30.pt')
 # g_net = torch.load('gen_model.pt')
 # d_net = torch.load('disc_model.pt')
