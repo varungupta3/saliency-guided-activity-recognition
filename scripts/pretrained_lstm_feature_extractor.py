@@ -20,6 +20,16 @@ class CNNFeatureExtractor(nn.Module):
   def __init__(self):
     super(CNNFeatureExtractor, self).__init__()    
 
+    gen_weights = np.load(genWeightsPath)
+    gen_weight_list_split = [int(i.split('_')[1]) for i in gen_weights.keys()]
+    gen_weight_list_split.sort(reverse=True)
+    gen_weight_list_order = ["arr_" + str(i) for i in gen_weight_list_split]
+
+    disc_weights = np.load(discWeightsPath)
+    disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
+    disc_weight_list_split.sort(reverse=True)
+    disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]
+
                             # Conv 0
     self.W0_1 = weight_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
     self.b0_1 = bias_tensor_from_np(disc_weights[disc_weight_list_order.pop()])
@@ -145,37 +155,30 @@ class CNNFeatureExtractor(nn.Module):
 
     return x
         
-gen_weights = np.load(genWeightsPath)
-gen_weight_list_split = [int(i.split('_')[1]) for i in gen_weights.keys()]
-gen_weight_list_split.sort(reverse=True)
-gen_weight_list_order = ["arr_" + str(i) for i in gen_weight_list_split]
 
-disc_weights = np.load(discWeightsPath)
-disc_weight_list_split = [int(i.split('_')[1]) for i in disc_weights.keys()]
-disc_weight_list_split.sort(reverse=True)
-disc_weight_list_order = ["arr_" + str(i) for i in disc_weight_list_split]
 
 
 class LSTM(nn.Module):
     def __init__(self):
         super(LSTM, self).__init__()
         self.lstm = nn.LSTM(input_size=512, 
-                            hidden_size=512,
-                            num_layers=1,
+                            hidden_size=768,
+                            num_layers=3,
                             batch_first=False,
                             bidirectional=False)
-        self.fc = nn.Linear(512*1,128)
+
+        self.fc = nn.Linear(768*1,128)
         self.fc1 = nn.Linear(128*1,16)
         self.fc2 = nn.Linear(128*1,37)
         self.hidden = self.init_hidden()
         
     def init_hidden(self):
-        return (Variable(torch.zeros(1, 1, 512)).cuda(), # shape is (num_layers,sequence_length,hidden_dim)
-                Variable(torch.zeros(1, 1, 512)).cuda())
+        return (Variable(torch.randn(3, 1, 768)).cuda(), # shape is (num_layers,sequence_length,hidden_dim)
+                Variable(torch.randn(3, 1, 768)).cuda())
     
     def forward(self, x):
-        hidden = self.init_hidden()        
-        output, hidden = self.lstm(x, hidden)
+        # hidden = self.init_hidden()
+        output, hidden = self.lstm(x, self.hidden)
 
         intermediate = self.fc(output.view(output.size()[0],-1))
         action_output = self.fc1(intermediate)
