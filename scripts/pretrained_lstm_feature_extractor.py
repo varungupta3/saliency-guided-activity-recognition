@@ -174,8 +174,8 @@ class LSTM(nn.Module):
                 Variable(torch.zeros(1, 1, 512)).cuda())
     
     def forward(self, x):
-        hidden = self.init_hidden()        
-        output, hidden = self.lstm(x, hidden)
+        # hidden = self.init_hidden()
+        output, hidden = self.lstm(x, self.hidden)
 
         intermediate = self.fc(output.view(output.size()[0],-1))
         action_output = self.fc1(intermediate)
