@@ -132,6 +132,7 @@ trainObjectsListPath = '../../cooking/ordered_action2.npy'
 # gazeDataDir = '../../../datasets/GTEA/gaze/'
 # imageDataDir = '../../../datasets/GTEA/'
 
+
 # 		# LSTM paths
 
 # trainImagesPath = '../../../datasets/GTEA/cooking/images.npy'

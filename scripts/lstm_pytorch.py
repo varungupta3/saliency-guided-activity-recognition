@@ -23,7 +23,7 @@ from pretrained_lstm_feature_extractor import *
 from pretrained_models_pytorch import *
 from config import *
 # from Salicon_loader import *
-from CookingSequenceloader import *
+from CookingSequenceLoader import *
 
 from dataloader_lstm import *
 # import EgoNet
