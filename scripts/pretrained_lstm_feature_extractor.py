@@ -163,16 +163,17 @@ class LSTM(nn.Module):
         super(LSTM, self).__init__()
 
         self.input_size = 512
-        self.hidden_size = 1024
-        self.num_layers = 1        
+        self.hidden_size = 512
+        self.num_layers = 2 
+        self.bidirectional = 2       
 
         self.lstm = nn.LSTM(input_size=self.input_size, 
                             hidden_size=self.hidden_size,
                             num_layers=self.num_layers,
                             batch_first=False,
-                            bidirectional=False)
+                            bidirectional=True)
 
-        self.fc = nn.Linear(self.num_layers*self.hidden_size,256)
+        self.fc = nn.Linear(self.bidirectional*self.hidden_size,256)
         self.fc1 = nn.Linear(256*1,16)
         self.fc2 = nn.Linear(256*1,37)
         self.hidden = self.init_hidden()
@@ -189,7 +190,7 @@ class LSTM(nn.Module):
         action_output = self.fc1(intermediate)
         object_output = self.fc2(intermediate)
 
-        action_output = F.log_softmax(action_output)
-        object_output = F.log_softmax(object_output)
+        action_output = F.softmax(action_output)
+        object_output = F.softmax(object_output)
 
         return torch.clamp(action_output,0,49688), torch.clamp(object_output,0,49688)
