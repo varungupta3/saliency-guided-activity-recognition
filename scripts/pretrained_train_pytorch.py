@@ -16,7 +16,7 @@ import argparse
 import matplotlib.pyplot as plt
 import cPickle as pickle
 import pdb
-
+from matplotlib.backends.backend_pdf import PdfPages
 # Other py files imports
 from constants import *
 from pretrained_models_pytorch import *
@@ -60,11 +60,11 @@ print (" 2.1 --> Building the network with Salgan model")
         # Deploying the generator network model from models-pytorch.py
 
 # g1_net = Generator()
-# g_net = torch.load('../gen_model_epoch10.pt')
-# d_net = torch.load('../disc_model_epoch10.pt')
+g_net = torch.load('../gen_model_mid.pt')
+d_net = torch.load('../disc_model_mid.pt')
 
-g_net = torch.load('../gen_model_epoch30.pt')
-d_net = torch.load('../disc_model_epoch30.pt')
+# g_net = torch.load('../gen_model_epoch30.pt')
+# d_net = torch.load('../disc_model_epoch30.pt')
 
 
 # g_net.load_state_dict(torch.load('gen_model.pt'))
@@ -75,8 +75,7 @@ BCELoss= nn.BCELoss().cuda()
 
 if args.cuda:
     g_net.cuda()
-    d_net.cuda()
-    
+    d_net.cuda()   
 
 
         # Using Adagrad optimizer with initial learning rate of 3e-4 and weight decay of 1e-4 
@@ -88,9 +87,11 @@ optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = ar
 contentloss = []
 discrimloss = []
 
-def plot_images(images, true_saliency, pred_saliency):
-    for i in np.random.randint(np.shape(images)[0], size=10):
-    # for i in range(32):
+
+
+def plot_images(images, true_saliency, pred_saliency,id):
+    # for i in np.random.randint(np.shape(images)[0], size=10):
+    for i in range(32):
         fig = plt.figure(i)
         ax1 = fig.add_subplot(131)
         surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
@@ -102,9 +103,24 @@ def plot_images(images, true_saliency, pred_saliency):
         surf = ax3.imshow(pred_saliency[i,:,:])
         ax3.set_title('Predicted Saliency')
 
+        # plt.cla()
+
         # pred_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3))).astype(np.uint8)
         # true_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3)/255.0)).astype(np.uint8)
-    plt.show()
+    # plt.show()
+    
+    def multipage(filename, figs=None, dpi=200):
+        pp = PdfPages(filename)
+        if figs is None:
+            figs = [plt.figure(n) for n in plt.get_fignums()]
+        for fig in figs:
+            fig.savefig(pp, format='pdf')
+        pp.close()
+
+    filename = 'plot_batch_mid{}.pdf'.format(id)
+    multipage(filename, dpi=250)
+
+    
 
  # Exponential learning rate decay
 def adjust_learning_rate(optimizer, epoch):
@@ -115,11 +131,11 @@ def adjust_learning_rate(optimizer, epoch):
         param_group['lr'] = lr
 
 def train(epoch):
-    g_net.train()
-    d_net.train()
+    # g_net.train()
+    # d_net.train()
 
-    # g_net.eval()
-    # d_net.eval()
+    g_net.eval()
+    d_net.eval()
 
     if epoch <= args.epochs_gen: 
         print (" Only Generator Training")
@@ -140,12 +156,18 @@ def train(epoch):
         pred_saliency = g_net(image)
 
         PLOT_FLAG = args.plot_saliency
+        
         if PLOT_FLAG:
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
             true_saliencies = true_saliency.squeeze().cpu().data.numpy()            
             pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
             pdb.set_trace()
-            plot_images(images, true_saliencies, pred_saliencies)
+
+            # plt.clf()
+            # plt.cla()
+            # plt.close('all')
+
+            plot_images(images, true_saliencies, pred_saliencies,batch_idx)
             image_fixated = images*(np.repeat(pred_saliencies[:,:,:,np.newaxis],3,axis=3))
             pdb.set_trace()
             PLOT_FLAG = False        
@@ -249,5 +271,6 @@ torch.save(d_net,'../disc_model_final.pt')
 
 np.save('../ContentLoss.npy',contentloss)
 np.save('../DiscriminatorLoss.npy',discrimloss)
+
 # g_net = torch.load('gen_model.pt')
 # d_net = torch.load('disc_model.pt')
