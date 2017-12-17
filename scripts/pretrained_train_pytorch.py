@@ -42,7 +42,7 @@ if args.cuda:
 
 trainimages = np.load(trainImagesPath)
 trainmasks = np.load(trainMasksPath)
-pdb.set_trace
+# pdb.set_trace
 # testimages = np.load(testImagesPath)
 # testmasks = np.load(testMasksPath)
 
@@ -115,7 +115,7 @@ def train(epoch):
             image, true_saliency = image.cuda(), true_saliency.cuda()
         
         image = image.squeeze()
-        image, true_saliency = Variable(image), Variable(true_saliency/255.0)             
+        image, true_saliency = Variable(image), Variable(true_saliency)             
 
                         # Evaluating the GAN Network
                     #-----------------------------------------    
@@ -127,7 +127,7 @@ def train(epoch):
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
             true_saliencies = true_saliency.squeeze().cpu().data.numpy()
             pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
-            
+            pdb.set_trace()
             plot_images(images, true_saliencies, pred_saliencies)
             image_fixated = images*(np.repeat(pred_saliencies[:,:,:,np.newaxis],3,axis=3))
             pdb.set_trace()

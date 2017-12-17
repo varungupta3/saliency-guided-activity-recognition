@@ -41,7 +41,7 @@ trainsaliencyimages = []
 
 noise_params = {'mu':0.7,'sigma':7,'size':[80,80]}
 
-skip_frequency = 8
+skip_frequency = 6
 saliencies = {}
 
 gauss_t = np.linspace(-10, 10, 80)
@@ -57,7 +57,7 @@ for videoName in videoNames:
     saliencies[videoName] = {}
     for frame_num, img_file in enumerate(img_files):
         if (frame_num+1) % skip_frequency != 0:
-            print ('Skip check')
+            # print ('Skip check')
             continue
 
         img = cv2.imread(img_file)

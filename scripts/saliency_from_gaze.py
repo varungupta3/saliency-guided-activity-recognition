@@ -38,7 +38,7 @@ trainsaliencyimages = []
 
 noise_params = {'mu':0.7,'sigma':7,'size':[200,200]}
 
-skip_frequency = 10
+skip_frequency = 6
 saliencies = {}
 
 gauss_t = np.linspace(-10, 10, 200)
