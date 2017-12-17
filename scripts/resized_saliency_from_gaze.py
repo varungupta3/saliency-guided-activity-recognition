@@ -7,7 +7,7 @@ import pdb
 from constants import *
 
 # gazeDataPath = 'Ahmed_American.txt'
-gaze_files = glob.glob(gazeDataDir + '*.txt')
+gaze_files = glob.glob(gazeDataDir + '*American.txt')
 gaze_dict = {}
 
 def adjust_gaze(x,y):
@@ -41,7 +41,7 @@ trainsaliencyimages = []
 
 noise_params = {'mu':0.7,'sigma':7,'size':[80,80]}
 
-skip_frequency = 6
+skip_frequency = 1
 saliencies = {}
 
 gauss_t = np.linspace(-10, 10, 80)
@@ -54,10 +54,12 @@ kernel_scaled = (kernel - np.min(kernel))/(np.max(kernel) - np.min(kernel))
 
 for videoName in videoNames:
     img_files = glob.glob(imageDataDir + videoName + '/*.jpg')
+    # pdb.set_trace()
     saliencies[videoName] = {}
+    # print img_files
     for frame_num, img_file in enumerate(img_files):
+        # pdb.set_trace()
         if (frame_num+1) % skip_frequency != 0:
-            # print ('Skip check')
             continue
 
         img = cv2.imread(img_file)
@@ -68,9 +70,9 @@ for videoName in videoNames:
         img_size = img.shape
         saliency_img = np.zeros([img_size[0],img_size[1],img_size[2]], dtype=np.float64)
         saliency = np.zeros([img_size[0],img_size[1]], dtype=np.float64)
-        if frame_num+1 in gaze_dict[videoName]:
+        if (frame_num+1) in gaze_dict[videoName]:
             print frame_num+1
-            for gaze in gaze_dict[videoName][frame_num+1]:
+            for num_gaze, gaze in enumerate(gaze_dict[videoName][frame_num+1]):
                 x = gaze[0] # Corresponds to column
                 y = gaze[1] # Corresponds to row
                 gaze_type = gaze[2]
@@ -89,18 +91,17 @@ for videoName in videoNames:
 
                 # To remove gaze points outside image frame
                 if ((xmax-xmin > 0) and (ymax-ymin > 0)):
-                    # print (xmin, xmax, ymin, ymax)
                     filter_size = [xmax-xmin, ymax-ymin]
-                    # print 'Filter size : ' , filter_size
                     saliency_map = kernel_scaled[y_center-dy_up:y_center+dy_down, x_center-dx_left:x_center+dx_right]
-                    # pdb.set_trace()
-                    sal_map_im = img[ymin:ymax, xmin:xmax,:] * np.repeat(saliency_map[:,:,np.newaxis],3,axis=2)
-                    saliency[ymin:ymax,xmin:xmax] = saliency_map
-                    saliency_img[ymin:ymax,xmin:xmax,:] = sal_map_im
+                    # sal_map_im = img[ymin:ymax, xmin:xmax,:] * np.repeat(saliency_map[:,:,np.newaxis],3,axis=2)
+                    saliency[ymin:ymax,xmin:xmax] = saliency[ymin:ymax,xmin:xmax] + saliency_map
+                    saliency = np.clip(saliency, 0.0, 1.0)
+                    # saliency_img[ymin:ymax,xmin:xmax,:] = saliency_img[ymin:ymax,xmin:xmax,:] + sal_map_im
 
             # resized_img = cv2.resize(img, (256,192))
             # resized_saliency_img = cv2.resize(saliency_img, (256,192))
             # resized_saliency = cv2.resize(saliency, (256,192))
+            saliency_img = img * np.repeat(saliency[:,:,np.newaxis],3,axis=2)
 
             trainimages.append(img)
             trainmask.append(saliency)
@@ -108,13 +109,12 @@ for videoName in videoNames:
             # pdb.set_trace()   
 
         saliencies[videoName][frame_num+1] = saliency
-        # pdb.set_trace()
-    # pdb.set_trace()
-pdb.set_trace()
+        
 np.save(trainImagesPath,trainimages)
 np.save(trainMasksPath,trainmask)
 np.save(trainSaliencyImagesPath,trainsaliencyimages)
 # pdb.set_trace()
+
 # The returned saliencies is a dictionary.
 # saliencies['John Doe'][f] gives the saliency map for video 'John Doe' and frame number f which starts from 1.
 # Some videos do not have saliency maps for all frames since fixations are not synchronized well with the image frames
