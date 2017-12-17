@@ -86,7 +86,7 @@ for gaze_file in gaze_files:
 
 noise_params = {'mu':0.7,'sigma':7,'size':[80,80]}
 
-skip_frequency = 4
+skip_frequency = 3
 cooking_data = {}
 
 gauss_t = np.linspace(-10, 10, 80)
@@ -152,8 +152,8 @@ for videoName in videoNames:
 
             # saliency_img = img * np.repeat(saliency[:,:,np.newaxis],3,axis=2) 
 
-        # cooking_frame_idxs.append(frame_num+1)
-        # cooking_saliency_maps.append(saliency)
+        cooking_frame_idxs.append(frame_num+1)
+        cooking_saliency_maps.append(saliency)
         cooking_images.append(img)
 
         # cooking_data[videoName][frame_num+1]['saliency'] = saliency
@@ -178,15 +178,15 @@ print 'Actions 2: ', action2_list
 
 np.save(saveDataPath + 'images.npy', cooking_images)
 print('Saved Images')
-# np.save(saveDataPath + 'saliency_maps.npy', cooking_saliency_maps)
-# print('Saved Saliency Maps')
-# np.save(saveDataPath + 'frame_idxs.npy', cooking_frame_idxs)
-# print('Saved Frame indexers')
-# np.save(saveDataPath + 'action1.npy', cooking_action1)
-# np.save(saveDataPath + 'action2.npy', cooking_action2)
-# print('Saved Actions')
-# np.save(saveDataPath + 'ordered_action1.npy', action1_list)
-# np.save(saveDataPath + 'ordered_action2.npy', action2_list)
-# print('Saved Action Indexers')
+np.save(saveDataPath + 'saliency_maps.npy', cooking_saliency_maps)
+print('Saved Saliency Maps')
+np.save(saveDataPath + 'frame_idxs.npy', cooking_frame_idxs)
+print('Saved Frame indexers')
+np.save(saveDataPath + 'action1.npy', cooking_action1)
+np.save(saveDataPath + 'action2.npy', cooking_action2)
+print('Saved Actions')
+np.save(saveDataPath + 'ordered_action1.npy', action1_list)
+np.save(saveDataPath + 'ordered_action2.npy', action2_list)
+print('Saved Action Indexers')
 
 pdb.set_trace()

@@ -130,7 +130,7 @@ discWeightsPath = "../../../datasets/discrim_modelWeights0090.npz"
 saveDataPath = "../../../datasets/GTEA/cooking/"
 labelsDataDir = '../../../datasets/GTEA/labels_cleaned/'
 gazeDataDir = '../../../datasets/GTEA/gaze/'
-imageDataDir = '../../../datasets/GTEA/'
+imageDataDir = '../../../datasets/'
 
 		# LSTM paths
 
