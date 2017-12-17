@@ -48,7 +48,7 @@ trainmasks = np.load(trainMasksPath)
 
     # Load Training Data via dataloader object (Salicon_loader.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = Salicon_loader(trainimages,trainmasks)    
-trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=True, num_workers=2)
+trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=False, num_workers=2)
   
     # Load Testing Data via dataloader object (Salicon_loader.py).
 # test_dataloader_obj = Salicon_loader(testimages,testmasks)
@@ -61,8 +61,12 @@ print (" 2.1 --> Building the network with Salgan model")
 
         # Deploying the generator network model from models-pytorch.py
 # g1_net = Generator()
-g_net = torch.load('../gen_model.pt')
-d_net = torch.load('../disc_model.pt')
+# g_net = torch.load('../gen_model_epoch10.pt')
+# d_net = torch.load('../disc_model_epoch10.pt')
+
+g_net = torch.load('../gen_model_epoch30.pt')
+d_net = torch.load('../disc_model_epoch30.pt')
+
 # g_net.load_state_dict(torch.load('gen_model.pt'))
         # Deploying the discriminator network model from models-pytorch.py
 # d_net = Discriminator()f
@@ -72,6 +76,7 @@ BCELoss= nn.BCELoss().cuda()
 if args.cuda:
     g_net.cuda()
     d_net.cuda()
+    
 
 
         # Using Adagrad optimizer with initial learning rate of 3e-4 and weight decay of 1e-4 
@@ -81,8 +86,8 @@ optimizer_gen = optim.Adagrad(gen_trainable_params, lr=args.lr, weight_decay = a
 optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = args.wd)
 
 def plot_images(images, true_saliency, pred_saliency):
-    for i in np.random.randint(np.shape(images)[0], size=10):
-    # for i in range(32):
+    # for i in np.random.randint(np.shape(images)[0], size=10):
+    for i in range(32):
         fig = plt.figure(i)
         ax1 = fig.add_subplot(131)
         surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
@@ -110,6 +115,11 @@ def train(epoch):
     g_net.train()
     d_net.train()
 
+    # g_net.eval()
+    # d_net.eval()
+    if epoch <= 10: 
+        print ("")
+
     for batch_idx, (image, true_saliency) in enumerate(trainloader):
         if args.cuda:
             image, true_saliency = image.cuda(), true_saliency.cuda()
@@ -120,12 +130,13 @@ def train(epoch):
                         # Evaluating the GAN Network
                     #-----------------------------------------    
             # Generate the predicted saliency map from the generator network.      
+        # pred_saliency1 = g_net(image)
         pred_saliency = g_net(image)
 
         PLOT_FLAG = args.plot_saliency
         if PLOT_FLAG:
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
-            true_saliencies = true_saliency.squeeze().cpu().data.numpy()
+            true_saliencies = true_saliency.squeeze().cpu().data.numpy()            
             pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
             pdb.set_trace()
             plot_images(images, true_saliencies, pred_saliencies)
@@ -143,8 +154,8 @@ def train(epoch):
 
         # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
         #------------------------------------------------------------------------------------------------------------
-        if epoch<=2:
-            print ('Generator Training')
+        if epoch<=10:
+            
 
                         # Only Generator Training (No Discriminator Training)
             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
@@ -164,7 +175,7 @@ def train(epoch):
 
         else:
                                  # Adversarial Training
-            print ('Adversarial Training')
+            
             # During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
             dis_output = d_net(stacked_image)
             # pdb.set_trace()
@@ -182,9 +193,9 @@ def train(epoch):
                 optimizer_gen.step()
 
                 if batch_idx % args.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tGenerator Loss: {:.6f}'.format(
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tContent Loss: {:.6f}\tAdversarial Loss: {:.6f}'.format(
                     epoch, batch_idx * len(image), len(trainloader.dataset),
-                    100. * batch_idx / len(trainloader), gen_loss.data[0]))
+                    100. * batch_idx / len(trainloader), content_loss.data[0]), adversarial_loss.data)
 
             else:
                             # Discriminator Training
