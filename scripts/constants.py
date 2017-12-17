@@ -1,56 +1,59 @@
-# # Work space directory
-HOME_DIR = '/media/autel/5C4C-7166/Anand/CIS680/FinalProject/Saliency-GAN/'
+workspace = "Anand"
 
-# Path to SALICON raw data
-pathToImages = '/home/autel/Downloads/CIS680Final/Datasets/images/'
-pathToMaps = '/home/autel/Downloads/CIS680Final/Datasets/maps/'
-pathToFixationMaps = '/home/autel/Downloads/CIS680Final/Datasets/fixations/'
+if workspace == "Anand":
+    # # Work space directory
+    HOME_DIR = '/media/autel/5C4C-7166/Anand/CIS680/FinalProject/Saliency-GAN/'
 
-# Path to processed data
-pathOutputImages = '/home/autel/Downloads/CIS680Final/Datasets/images320x240/'
-pathOutputMaps = '/home/autel/Downloads/CIS680Final/Datasets/saliency320x240/'
-pathToPickle = '/home/autel/Downloads/CIS680Final/Datasets/320x240/'
+    # Path to SALICON raw data
+    pathToImages = '/home/autel/Downloads/CIS680Final/Datasets/images/'
+    pathToMaps = '/home/autel/Downloads/CIS680Final/Datasets/maps/'
+    pathToFixationMaps = '/home/autel/Downloads/CIS680Final/Datasets/fixations/'
 
-# Path to pickles which contains processed data
-TRAIN_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/trainData.pickle'
-VAL_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/validationData.pickle'
-TEST_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/testData.pickle'
+    # Path to processed data
+    pathOutputImages = '/home/autel/Downloads/CIS680Final/Datasets/images320x240/'
+    pathOutputMaps = '/home/autel/Downloads/CIS680Final/Datasets/saliency320x240/'
+    pathToPickle = '/home/autel/Downloads/CIS680Final/Datasets/320x240/'
 
-# Path to vgg16 pre-trained weights
-PATH_TO_VGG16_WEIGHTS = '/home/autel/Downloads/saliency-salgan-2017/vgg16.pkl'
+    # Path to pickles which contains processed data
+    TRAIN_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/trainData.pickle'
+    VAL_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/validationData.pickle'
+    TEST_DATA_DIR = '/home/autel/Downloads/CIS680Final/Datasets/320x240/testData.pickle'
 
-# Input image and saliency map size
-ORIG_SIZE = (1280, 960)
-INPUT_SIZE = (256, 192)
+    # Path to vgg16 pre-trained weights
+    PATH_TO_VGG16_WEIGHTS = '/home/autel/Downloads/saliency-salgan-2017/vgg16.pkl'
 
-# Directory to keep snapshots
-DIR_TO_SAVE = 'test'
+    # Input image and saliency map size
+    ORIG_SIZE = (1280, 960)
+    INPUT_SIZE = (256, 192)
 
-	# Pretrained train pytorch paths
+    # Directory to keep snapshots
+    DIR_TO_SAVE = 'test'
 
-# trainImagesPath = '../../cookingtrainimages.npy'
-# trainMasksPath = '../../cookingtrainmask.npy'
-# trainSaliencyImagesPath = '../../cookingtrainsaliencyimages.npy'
+    # Pretrained train pytorch paths
 
-testImagesPath = '../../testimages.npy'
-testMasksPath = '../../testmask.npy'
+    # trainImagesPath = '../../cookingtrainimages.npy'
+    # trainMasksPath = '../../cookingtrainmask.npy'
+    # trainSaliencyImagesPath = '../../cookingtrainsaliencyimages.npy'
 
-genWeightsPath = "../../gen_modelWeights0090.npz"
-discWeightsPath = "../../discrim_modelWeights0090.npz"
+    testImagesPath = '../../testimages.npy'
+    testMasksPath = '../../testmask.npy'
 
-gazeDataDir = '../../gaze/'
-imageDataDir = '../../'
-saveDataPath = "../../cooking/"
-labelsDataDir = '../../labels_cleaned/'
+    genWeightsPath = "../../gen_modelWeights0090.npz"
+    discWeightsPath = "../../discrim_modelWeights0090.npz"
 
-		# LSTM paths
+    gazeDataDir = '../../gaze/'
+    imageDataDir = '../../'
+    saveDataPath = "../../cooking/"
+    labelsDataDir = '../../labels_cleaned/'
 
-trainImagesPath = '../../cooking/images.npy'
-trainMasksPath = '../../cooking/saliency_maps.npy'
-trainActionsPath = '../../cooking/action1.npy'
-trainObjectsPath = '../../cooking/action2.npy'
-trainActionsListPath = '../../cooking/ordered_action1.npy'
-trainObjectsListPath = '../../cooking/ordered_action2.npy'
+        # LSTM paths
+
+    trainImagesPath = '../../cooking/images.npy'
+    trainMasksPath = '../../cooking/saliency_maps.npy'
+    trainActionsPath = '../../cooking/action1.npy'
+    trainObjectsPath = '../../cooking/action2.npy'
+    trainActionsListPath = '../../cooking/ordered_action1.npy'
+    trainObjectsListPath = '../../cooking/ordered_action2.npy'
 
 
 
@@ -88,56 +91,56 @@ trainObjectsListPath = '../../cooking/ordered_action2.npy'
 #----------------------------------------------------------------------------------------------------------------
 # Varun's Workspace
 #----------------------------------------------------------------------------------------------------------------
+elif workspace == "Varun":
+    # Work space directory
+    HOME_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/saliency-salgan-2017/'
 
-# Work space directory
-# HOME_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/saliency-salgan-2017/'
+    # Path to SALICON raw data
+    pathToImages = '/home/varun/Courses/CIS680/project/datasets/SALICON/images/'
+    pathToMaps = '/home/varun/Courses/CIS680/project/datasets/SALICON/maps/'
+    pathToFixationMaps = '/home/varun/Courses/CIS680/project/datasets/SALICON/fixations/'
 
-# # Path to SALICON raw data
-# pathToImages = '/home/varun/Courses/CIS680/project/datasets/SALICON/images/'
-# pathToMaps = '/home/varun/Courses/CIS680/project/datasets/SALICON/maps/'
-# pathToFixationMaps = '/home/varun/Courses/CIS680/project/datasets/SALICON/fixations/'
+    # Path to processed data
+    pathOutputImages = '/home/varun/Courses/CIS680/project/datasets/SALICON/images320x240/'
+    pathOutputMaps = '/home/varun/Courses/CIS680/project/datasets/SALICON/saliency320x240/'
+    pathToPickle = '/home/varun/Courses/CIS680/project/datasets/SALICON/320x240/'
 
-# # Path to processed data
-# pathOutputImages = '/home/varun/Courses/CIS680/project/datasets/SALICON/images320x240/'
-# pathOutputMaps = '/home/varun/Courses/CIS680/project/datasets/SALICON/saliency320x240/'
-# pathToPickle = '/home/varun/Courses/CIS680/project/datasets/SALICON/320x240/'
+    # Path to pickles which contains processed data
+    TRAIN_DATA_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/320x240/trainData.pickle'
+    VAL_DATA_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/320x240/validationData.pickle'
+    TEST_DATA_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/256x192/testData.pickle'
 
-# # Path to pickles which contains processed data
-# TRAIN_DATA_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/320x240/trainData.pickle'
-# VAL_DATA_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/320x240/validationData.pickle'
-# TEST_DATA_DIR = '/home/varun/Courses/CIS680/project/datasets/SALICON/256x192/testData.pickle'
+    # Path to vgg16 pre-trained weights
+    PATH_TO_VGG16_WEIGHTS = '/home/varun/Courses/CIS680/saliency-salgan-2017/vgg16.pkl'
 
-# # Path to vgg16 pre-trained weights
-# PATH_TO_VGG16_WEIGHTS = '/home/varun/Courses/CIS680/saliency-salgan-2017/vgg16.pkl'
+    # Input image and saliency map size
+    ORIG_SIZE = (1280, 960)
+    INPUT_SIZE = (256, 192)
 
-# # Input image and saliency map size
-# ORIG_SIZE = (1280, 960)
-# INPUT_SIZE = (256, 192)
+    # Directory to keep snapshots
+    DIR_TO_SAVE = 'test'
 
-# # Directory to keep snapshots
-# DIR_TO_SAVE = 'test'
+    trainImagesPath = '../../../datasets/data/resizedcookingtrainimages.npy'
+    trainMasksPath = '../../../datasets/data/resizedcookingtrainmask.npy'
+    trainSaliencyImagesPath = '../../../datasets/data/resizedcookingtrainsaliencyimages.npy'
 
-# trainImagesPath = '../../../datasets/data/resizedcookingtrainimages.npy'
-# trainMasksPath = '../../../datasets/data/resizedcookingtrainmask.npy'
-# trainSaliencyImagesPath = '../../../datasets/data/resizedcookingtrainsaliencyimages.npy'
+    testImagesPath = '../../../datasets/data/testimages.npy'
+    testMasksPath = '../../../datasets/data/testmask.npy'
 
-# testImagesPath = '../../../datasets/data/testimages.npy'
-# testMasksPath = '../../../datasets/data/testmask.npy'
+    genWeightsPath = "../../../datasets/gen_modelWeights0090.npz"
+    discWeightsPath = "../../../datasets/discrim_modelWeights0090.npz"
 
-# genWeightsPath = "../../../datasets/gen_modelWeights0090.npz"
-# discWeightsPath = "../../../datasets/discrim_modelWeights0090.npz"
-
-# saveDataPath = "../../../datasets/GTEA/cooking/"
-# labelsDataDir = '../../../datasets/GTEA/labels_cleaned/'
-# gazeDataDir = '../../../datasets/GTEA/gaze/'
-# imageDataDir = '../../../datasets/GTEA/'
+    saveDataPath = "../../../datasets/GTEA/cooking/"
+    labelsDataDir = '../../../datasets/GTEA/labels_cleaned/'
+    gazeDataDir = '../../../datasets/GTEA/gaze/'
+    imageDataDir = '../../../datasets/GTEA/'
 
 
-# 		# LSTM paths
+    		# LSTM paths
 
-# trainImagesPath = '../../../datasets/GTEA/cooking/images.npy'
-# trainMasksPath = '../../../datasets/GTEA/cooking/saliency_maps.npy'
-# trainActionsPath = '../../../datasets/GTEA/cooking/action1.npy'
-# trainObjectsPath = '../../../datasets/GTEA/cooking/action2.npy'
-# trainActionsListPath = '../../../datasets/GTEA/cooking/ordered_action1.npy'
-# trainObjectsListPath = '../../../datasets/GTEA/cooking/ordered_action2.npy'
+    trainImagesPath = '../../../datasets/GTEA/cooking/images.npy'
+    trainMasksPath = '../../../datasets/GTEA/cooking/saliency_maps.npy'
+    trainActionsPath = '../../../datasets/GTEA/cooking/action1.npy'
+    trainObjectsPath = '../../../datasets/GTEA/cooking/action2.npy'
+    trainActionsListPath = '../../../datasets/GTEA/cooking/ordered_action1.npy'
+    trainObjectsListPath = '../../../datasets/GTEA/cooking/ordered_action2.npy'
