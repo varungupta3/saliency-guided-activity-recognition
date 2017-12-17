@@ -161,20 +161,25 @@ class CNNFeatureExtractor(nn.Module):
 class LSTM(nn.Module):
     def __init__(self):
         super(LSTM, self).__init__()
-        self.lstm = nn.LSTM(input_size=512, 
-                            hidden_size=768,
-                            num_layers=3,
+
+        self.input_size = 512
+        self.hidden_size = 1024
+        self.num_layers = 1        
+
+        self.lstm = nn.LSTM(input_size=self.input_size, 
+                            hidden_size=self.hidden_size,
+                            num_layers=self.num_layers,
                             batch_first=False,
                             bidirectional=False)
 
-        self.fc = nn.Linear(768*1,128)
-        self.fc1 = nn.Linear(128*1,16)
-        self.fc2 = nn.Linear(128*1,37)
+        self.fc = nn.Linear(self.num_layers*self.hidden_size,256)
+        self.fc1 = nn.Linear(256*1,16)
+        self.fc2 = nn.Linear(256*1,37)
         self.hidden = self.init_hidden()
         
     def init_hidden(self):
-        return (Variable(torch.randn(3, 1, 768)).cuda(), # shape is (num_layers,sequence_length,hidden_dim)
-                Variable(torch.randn(3, 1, 768)).cuda())
+        return (Variable(torch.randn(self.num_layers, 1, self.hidden_size)).cuda(), # shape is (num_layers,sequence_length,hidden_dim)
+                Variable(torch.randn(self.num_layers, 1, self.hidden_size)).cuda())
     
     def forward(self, x):
         # hidden = self.init_hidden()
@@ -183,5 +188,8 @@ class LSTM(nn.Module):
         intermediate = self.fc(output.view(output.size()[0],-1))
         action_output = self.fc1(intermediate)
         object_output = self.fc2(intermediate)
+
+        action_output = F.log_softmax(action_output)
+        object_output = F.log_softmax(object_output)
 
         return torch.clamp(action_output,0,49688), torch.clamp(object_output,0,49688)
