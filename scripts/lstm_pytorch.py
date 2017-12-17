@@ -38,8 +38,9 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 PLOT_FLAG = args.plot_saliency
-# # Salicon Data Processing
-# #-------------------------------------------------------------
+
+# Salicon Data Processing
+#-------------------------------------------------------------
 
 # trainimages = np.load("../../Cookingdata.npy")
 
@@ -74,16 +75,14 @@ lstm = LSTM()
 if args.cuda:
     lstm.cuda()
 
-
 if args.predict_saliency:
 
-            # Deploying the generator network model using EgoNet
-    # The network architecture for the encoder using VGG16 model weights pretrained on ImageNet data from the pytorch model zoo.
+            # Deploying the network for saliency generation   
     # model = EgoNet.EgoNet
-    model = Generator()
     # Loading the pretrained weights from the EgoNet Caffe model to the computational graph created by the network above.
-    # model.load_state_dict(torch.load('EgoNet.pth'))       
-    pdb.set_trace()
+    # model.load_state_dict(torch.load('EgoNet.pth')) 
+
+    model = Generator()   
     if args.cuda:
         model.cuda()   
 
@@ -127,14 +126,15 @@ def train(epoch):
     else:
         cnn_feat.train()
         lstm.train()
+
     correct_act = 0
     correct_obj = 0
+
     for batch_idx, (image,action,obj,true_saliency) in enumerate(trainloader):
         if args.cuda:
             image, action, obj, true_saliency = image.cuda(), action.cuda(), obj.cuda(), true_saliency.cuda()
             # pdb.set_trace()
-        image = image.squeeze()
-        # image_masked = image_masked.squeeze()
+        image = image.squeeze()        
         image, action, obj, true_saliency = Variable(image), Variable(action), Variable(obj), Variable(true_saliency)        
                        
             # Generate the predicted saliency map from the generator network.
@@ -150,7 +150,7 @@ def train(epoch):
             if PLOT_FLAG:
                 plot_images(images, pred_saliencies)            
 
-            # Using the true saliency maps to generate fixation maps on the images to evalute LSTM  
+            # Using the true saliency maps stacked with the images to evalute LSTM  
         else:              
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
             true_saliencies= (true_saliency.cpu().data.numpy())#.transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]            
@@ -191,10 +191,12 @@ def train(epoch):
             lstm_action_loss = CrossEntropy(act_out,action.view(-1))
             lstm_object_loss = CrossEntropy(obj_out,obj.view(-1))
 
+            total_loss = lstm_action_loss + lstm_object_loss
 
             optimizer.zero_grad()
-            lstm_action_loss.backward(retain_graph=True)
-            lstm_object_loss.backward()
+            # lstm_action_loss.backward(retain_graph=True)
+            # lstm_object_loss.backward()
+            total_loss.backward()
             optimizer.step()
 
             if batch_idx % args.log_interval == 0:
@@ -215,6 +217,6 @@ def train(epoch):
                                                     len(trainloader.dataset), 100. * correct_obj / len(trainloader.dataset)))    
 
 for epoch in range(1, args.epochs+1):
-    adjust_learning_rate(optimizer, epoch)
+    # adjust_learning_rate(optimizer, epoch)
     train(epoch)
     
