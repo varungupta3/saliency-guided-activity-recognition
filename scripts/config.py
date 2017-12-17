@@ -11,6 +11,7 @@ parser.add_argument('--test_batchsize', type=int, default=32, help='input batch 
 
 parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)')
 parser.add_argument('--epochs_gen', type=int, default=10, help='number of epochs to train only generator(default: 10)')
+# parser.add_argument('--epochs_lstm', type=int, default=50, help='number of epochs to train lstm(default: 10)')
 
 parser.add_argument('--lr', type=float, default=3e-4, help='learning rate (default: 0.0003)')
 parser.add_argument('--min_lr', type=float, default=1e-5, help='minimum learning rate (default: 0.00001)')

@@ -7,9 +7,8 @@ class CookingSequentialLoader(Dataset):
         
         self.images = images
 
-        #reshape to N*C*H*W
-        # self.data = self.data.reshape(self.data.shape[0],3,48,48)   
-        self.data = self.data.transpose([0,3,1,2])    
+        #reshape to N*C*H*W          
+        self.images = self.images.transpose([0,3,1,2])    
 
         self.actions = actions        
         self.objects = objects
@@ -30,38 +29,38 @@ class CookingSequentialLoader(Dataset):
 
         # use broadcasting to vectorizely normalize image
         img = (img - self.mean_val.reshape(1,3,1,1))#/(self.std.reshape(1,3,1,1))
-        act = self.actions[index]
-        obj = self.objects[index]
-        mask = self.mask[index,:,:]
+        act = self.actions[index].reshape(-1,)
+        obj = self.objects[index].reshape(-1,)
+        saliency = self.saliency[index,:,:]
 
         # convert numpy array to torch tensor variable
         img = torch.from_numpy(img.astype(np.float32))
-        act = torch.from_numpy(act)
-        obj = torch.from_numpy(obj)
-        mask = torch.from_numpy(mask.astype(np.float32))        
+        act = torch.from_numpy(act).type(torch.LongTensor)
+        obj = torch.from_numpy(obj).type(torch.LongTensor)
+        saliency = torch.from_numpy(saliency.astype(np.float32))        
         
-        return img,mask
+        return img,act,obj,saliency
 
     def __len__(self):
         #this function define the upper bound of input index
         #it's usually set to the data image number
 
-        return self.data.shape[0]
-        # return 2000
+        # return self.data.shape[0]
+        return 2000
 
 
-class SubsetRandomSampler(Sampler):
-    """Samples elements randomly from a given list of indices, without replacement.
+# class SubsetRandomSampler(Sampler):
+#     """Samples elements randomly from a given list of indices, without replacement.
 
-    Arguments:
-        indices (list): a list of indices
-    """
+#     Arguments:
+#         indices (list): a list of indices
+#     """
 
-    def __init__(self, indices):
-        self.indices = indices
+#     def __init__(self, indices):
+#         self.indices = indices
 
-    def __iter__(self):
-        return (self.indices[i] for i in self.indices)
+#     def __iter__(self):
+#         return (self.indices[i] for i in self.indices)
 
-    def __len__(self):
-        return len(self.indices)
+#     def __len__(self):
+#         return len(self.indices)
