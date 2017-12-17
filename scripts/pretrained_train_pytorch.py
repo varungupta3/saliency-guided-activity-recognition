@@ -16,7 +16,7 @@ import argparse
 import matplotlib.pyplot as plt
 import cPickle as pickle
 import pdb
-
+from matplotlib.backends.backend_pdf import PdfPages
 # Other py files imports
 from constants import *
 from pretrained_models_pytorch import *
@@ -60,11 +60,11 @@ print (" 2.1 --> Building the network with Salgan model")
         # Deploying the generator network model from models-pytorch.py
 
 # g1_net = Generator()
-# g_net = torch.load('../gen_model_epoch10.pt')
-# d_net = torch.load('../disc_model_epoch10.pt')
+g_net = torch.load('../gen_model_mid.pt')
+d_net = torch.load('../disc_model_mid.pt')
 
-g_net = torch.load('../gen_model_epoch30.pt')
-d_net = torch.load('../disc_model_epoch30.pt')
+# g_net = torch.load('../gen_model_epoch30.pt')
+# d_net = torch.load('../disc_model_epoch30.pt')
 
 
 # g_net.load_state_dict(torch.load('gen_model.pt'))
@@ -88,9 +88,11 @@ optimizer_disc = optim.Adagrad(d_net.parameters(), lr=args.lr, weight_decay = ar
 contentloss = []
 discrimloss = []
 
-def plot_images(images, true_saliency, pred_saliency):
-    for i in np.random.randint(np.shape(images)[0], size=10):
-    # for i in range(32):
+
+
+def plot_images(images, true_saliency, pred_saliency,id):
+    # for i in np.random.randint(np.shape(images)[0], size=10):
+    for i in range(32):
         fig = plt.figure(i)
         ax1 = fig.add_subplot(131)
         surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
@@ -102,9 +104,24 @@ def plot_images(images, true_saliency, pred_saliency):
         surf = ax3.imshow(pred_saliency[i,:,:])
         ax3.set_title('Predicted Saliency')
 
+        # plt.cla()
+
         # pred_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3))).astype(np.uint8)
         # true_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3)/255.0)).astype(np.uint8)
-    plt.show()
+    # plt.show()
+    
+    def multipage(filename, figs=None, dpi=200):
+        pp = PdfPages(filename)
+        if figs is None:
+            figs = [plt.figure(n) for n in plt.get_fignums()]
+        for fig in figs:
+            fig.savefig(pp, format='pdf')
+        pp.close()
+
+    filename = 'plot_batch_mid{}.pdf'.format(id)
+    multipage(filename, dpi=250)
+
+    
 
  # Exponential learning rate decay
 def adjust_learning_rate(optimizer, epoch):
@@ -115,11 +132,11 @@ def adjust_learning_rate(optimizer, epoch):
         param_group['lr'] = lr
 
 def train(epoch):
-    g_net.train()
-    d_net.train()
+    # g_net.train()
+    # d_net.train()
 
-    # g_net.eval()
-    # d_net.eval()
+    g_net.eval()
+    d_net.eval()
 
     if epoch <= args.epochs_gen: 
         print (" Only Generator Training")
@@ -140,88 +157,94 @@ def train(epoch):
         pred_saliency = g_net(image)
 
         PLOT_FLAG = args.plot_saliency
+        
         if PLOT_FLAG:
             images = (image.cpu().data.numpy().transpose([0,2,3,1]) + np.array([103.939, 116.779, 123.68]).reshape(1,1,1,3))[:,:,:,::-1]
             true_saliencies = true_saliency.squeeze().cpu().data.numpy()            
             pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
             pdb.set_trace()
-            plot_images(images, true_saliencies, pred_saliencies)
+
+            # plt.clf()
+            # plt.cla()
+            # plt.close('all')
+
+            plot_images(images, true_saliencies, pred_saliencies,batch_idx)
             image_fixated = images*(np.repeat(pred_saliencies[:,:,:,np.newaxis],3,axis=3))
             pdb.set_trace()
             PLOT_FLAG = False        
 
-            # Concatenate the predicted saliency map to the original image so that it can be fed into the discriminator network. RGBS Image = 256 x 192 x 4
-        stacked_image = torch.cat((image,pred_saliency),1)
+        #     # Concatenate the predicted saliency map to the original image so that it can be fed into the discriminator network. RGBS Image = 256 x 192 x 4
+        # stacked_image = torch.cat((image,pred_saliency),1)
         
-        pred_saliency = pred_saliency.squeeze() 
+        # pred_saliency = pred_saliency.squeeze() 
 
-            #Feeding the stacked image with saliency map to the discriminator network to get a single probability value that tells us the probability of fooling the network
+        #     #Feeding the stacked image with saliency map to the discriminator network to get a single probability value that tells us the probability of fooling the network
         
 
-        # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
-        #------------------------------------------------------------------------------------------------------------
-        if epoch<=args.epochs_gen:
+        # # Bootstrap the network for first 15 epochs using only the BCE Content Loss and then add the discriminator
+        # #------------------------------------------------------------------------------------------------------------
+        # if epoch<=args.epochs_gen:
 
-                        # Only Generator Training (No Discriminator Training)
-            # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
+        #                 # Only Generator Training (No Discriminator Training)
+        #     # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
 
-            # Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
+        #     # Remember to add Downscale Saliency maps for prediction and ground truth for BCE loss.
                       
-            gen_loss = BCELoss(pred_saliency,true_saliency) 
-            # pdb.set_trace()
-            contentloss.append(gen_loss.data[0])
+        #     gen_loss = BCELoss(pred_saliency,true_saliency) 
+        #     # pdb.set_trace()
+        #     contentloss.append(gen_loss.data[0])
 
-            optimizer_gen.zero_grad()
-            gen_loss.backward()
-            optimizer_gen.step()
+        #     optimizer_gen.zero_grad()
+        #     gen_loss.backward()
+        #     optimizer_gen.step()
 
-            if batch_idx % args.log_interval == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tContent_Loss: {:.6f}'.format(
-                    epoch, batch_idx * len(image), len(trainloader.dataset),
-                    100. * batch_idx / len(trainloader), gen_loss.data[0]))
+        #     if batch_idx % args.log_interval == 0:
+        #         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tContent_Loss: {:.6f}'.format(
+        #             epoch, batch_idx * len(image), len(trainloader.dataset),
+        #             100. * batch_idx / len(trainloader), gen_loss.data[0]))
 
-        else:
-                                 # Adversarial Training
+        # else:
+        #                          # Adversarial Training
             
-            # During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
-            dis_output = d_net(stacked_image)
-            # pdb.set_trace()
-            if (batch_idx%2)==0:
-                            # Generator Training  
-                    # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
-                content_loss = BCELoss(pred_saliency,true_saliency)        
-                    # Calculating the Adversarial loss
-                disc_loss = torch.mean(-torch.log(dis_output))
-                    # The final loss function of the generator i.e. GAN Loss is defined as 
-                gen_loss = (args.alpha*content_loss) + disc_loss
+        #     # During the adversarial Training, the training of the generator and discriminator is alternated after each batch 
+        #     dis_output = d_net(stacked_image)
+        #     # pdb.set_trace()
+        #     if (batch_idx%2)==0:
+        #                     # Generator Training  
+        #             # Calculating the Content Loss between predicted saliency map and ground truth saliency map.
+        #         content_loss = BCELoss(pred_saliency,true_saliency)        
+        #             # Calculating the Adversarial loss
+        #         disc_loss = torch.mean(-torch.log(dis_output))
+        #             # The final loss function of the generator i.e. GAN Loss is defined as 
+        #         gen_loss = (args.alpha*content_loss) + disc_loss
 
-                contentloss.append(content_loss.data[0])
-                discrimloss.append(adversarial_loss.data[0])
+        #         contentloss.append(content_loss.data[0])
+        #         discrimloss.append(adversarial_loss.data[0])
 
-                optimizer_gen.zero_grad()
-                gen_loss.backward()
-                optimizer_gen.step()
+        #         optimizer_gen.zero_grad()
+        #         gen_loss.backward()
+        #         optimizer_gen.step()
 
-                if batch_idx % args.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tContent Loss: {:.6f}\tDiscriminator Loss: {:.6f}'.format(
-                    epoch, batch_idx * len(image), len(trainloader.dataset),
-                    100. * batch_idx / len(trainloader), content_loss.data[0]), disc_loss.data[0])
+        #         if batch_idx % args.log_interval == 0:
+        #             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tContent Loss: {:.6f}\tDiscriminator Loss: {:.6f}'.format(
+        #             epoch, batch_idx * len(image), len(trainloader.dataset),
+        #             100. * batch_idx / len(trainloader), content_loss.data[0]), disc_loss.data[0])
 
-            else:
-                            # Discriminator Training
-                    # Calculating the discriminator loss which is the negative of adversarial loss and no content loss
-                disc_loss = torch.mean(torch.log(dis_output))
+        #     else:
+        #                     # Discriminator Training
+        #             # Calculating the discriminator loss which is the negative of adversarial loss and no content loss
+        #         disc_loss = torch.mean(torch.log(dis_output))
                 
-                discrimloss.append(adversarial_loss.data[0])
+        #         discrimloss.append(adversarial_loss.data[0])
 
-                optimizer_disc.zero_grad()
-                disc_loss.backward()
-                optimizer_disc.step()
+        #         optimizer_disc.zero_grad()
+        #         disc_loss.backward()
+        #         optimizer_disc.step()
 
-                if batch_idx % args.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tDiscriminator Loss: {:.6f}'.format(
-                    epoch, batch_idx * len(image), len(trainloader.dataset),
-                    100. * batch_idx / len(trainloader), disc_loss.data[0])) 
+        #         if batch_idx % args.log_interval == 0:
+        #             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tDiscriminator Loss: {:.6f}'.format(
+        #             epoch, batch_idx * len(image), len(trainloader.dataset),
+        #             100. * batch_idx / len(trainloader), disc_loss.data[0])) 
         
 
         
@@ -236,18 +259,19 @@ for epoch in range(1, args.epochs+1):
  #      adjust_learning_rate(optimizer_gen, epoch)
  #      adjust_learning_rate(optimizer_disc,epoch-15)
     train(epoch)
-    if epoch == args.epochs_gen:
-        torch.save(g_net,'../gen_model_mid.pt')
-        torch.save(d_net,'../disc_model_mid.pt')
+    # if epoch == args.epochs_gen:
+    #     torch.save(g_net,'../gen_model_mid.pt')
+    #     torch.save(d_net,'../disc_model_mid.pt')
 
 
     # if iter%args.log_interval == 0:        
     #     test()
 
-torch.save(g_net,'../gen_model_final.pt')
-torch.save(d_net,'../disc_model_final.pt')
+# torch.save(g_net,'../gen_model_final.pt')
+# torch.save(d_net,'../disc_model_final.pt')
 
-np.save('../ContentLoss.npy',contentloss)
-np.save('../DiscriminatorLoss.npy',discrimloss)
+# np.save('../ContentLoss.npy',contentloss)
+# np.save('../DiscriminatorLoss.npy',discrimloss)
+
 # g_net = torch.load('gen_model.pt')
 # d_net = torch.load('disc_model.pt')
