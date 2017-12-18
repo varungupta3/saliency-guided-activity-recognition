@@ -13,10 +13,10 @@ parser.add_argument('--epochs', type=int, default=50, help='number of epochs to 
 parser.add_argument('--epochs_gen', type=int, default=10, help='number of epochs to train only generator(default: 10)')
 # parser.add_argument('--epochs_lstm', type=int, default=50, help='number of epochs to train lstm(default: 10)')
 
-parser.add_argument('--lr', type=float, default=3e-4, help='learning rate (default: 0.0003)')
+parser.add_argument('--lr', type=float, default=5e-3, help='learning rate (default: 0.0003)')
 parser.add_argument('--min_lr', type=float, default=1e-5, help='minimum learning rate (default: 0.00001)')
 parser.add_argument('--wd', type=float, default=1e-4, help='weight decay (default: 0.0001)')
-parser.add_argument('--momentum', type=float, default=0.5, help='optimizer momentum (default: 0.5)')
+parser.add_argument('--momentum', type=float, default=0.9, help='optimizer momentum (default: 0.5)')
 parser.add_argument('--alpha', type=float, default=0.05, help='alpha (default: 0.05)')
 
 parser.add_argument('--no-cuda', action='store_true', default=False, help='disables CUDA training')

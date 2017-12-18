@@ -1,4 +1,4 @@
-from __future__ import print_function
+# from __future__ import print_function
 from __future__ import division
 
 # Torch imports
@@ -92,7 +92,8 @@ else:
         cnn_feat.cuda()
 
 CrossEntropy = nn.CrossEntropyLoss().cuda()
-optimizer = optim.SGD(cnn_feat.parameters(), lr=args.lr, weight_decay = args.wd)
+# optimizer = optim.SGD(lstm.parameters(), lr=args.lr, momentum = args.momentum, weight_decay = args.wd)
+optimizer = optim.SGD([{'params': cnn_feat.parameters()},{'params': lstm.parameters(),'lr': 3e-4}], lr=args.lr, momentum=args.momentum, weight_decay=args.wd)
 
 def plot_images(images, pred_saliency):
     for i in np.random.randint(np.shape(images)[0], size=10):
@@ -212,11 +213,12 @@ def train(epoch):
             correct_obj += pred_obj.eq(obj.data.view_as(pred_obj)).cpu().sum()
 
             # pdb.set_trace()       
-    print('\nAction Accuracy: {}/{} ({:.0f}%)\t Object  Accuracy: {}/{} ({:.0f}%)\n'
-                    .format(correct_act, len(trainloader.dataset), 100. * correct_act / len(trainloader.dataset), correct_obj,
-                                                    len(trainloader.dataset), 100. * correct_obj / len(trainloader.dataset)))    
+    print('\nAction Accuracy: {}/{} ({:.2f}%)\t Object  Accuracy: {}/{} ({:.2f}%)\n'
+                    .format(correct_act, len(trainloader.dataset), 100 * (correct_act / len(trainloader.dataset)), correct_obj,
+                                                    len(trainloader.dataset), 100 * (correct_obj / len(trainloader.dataset))))  
+    # pdb.set_trace()  
 
 for epoch in range(1, args.epochs+1):
-    # adjust_learning_rate(optimizer, epoch)
+    adjust_learning_rate(optimizer, epoch)
     train(epoch)
     
