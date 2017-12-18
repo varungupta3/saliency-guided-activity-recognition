@@ -93,7 +93,7 @@ else:
 
 CrossEntropy = nn.CrossEntropyLoss().cuda()
 # optimizer = optim.SGD(lstm.parameters(), lr=args.lr, momentum = args.momentum, weight_decay = args.wd)
-optimizer = optim.SGD([{'params': cnn_feat.parameters()},{'params': lstm.parameters(),'lr': 3e-4}], lr=args.lr, momentum=args.momentum, weight_decay=args.wd)
+optimizer = optim.SGD([{'params': cnn_feat.parameters()},{'params': lstm.parameters(),'lr': 3e-4}], lr=args.lr, momentum = args.momentum, weight_decay=args.wd)
 
 def plot_images(images, pred_saliency):
     for i in np.random.randint(np.shape(images)[0], size=10):
@@ -165,21 +165,22 @@ def train(epoch):
                 # Passing the masked images to extract features using a CNN for LSTM sequence analysis. Will have 512 channels downsampled by a factor of 5 at the end of this.
             # image_fixated = image_fixated.astype(np.float32)
             
-            image_appended = torch.cat((image,true_saliency),1)
-            # image_input = Variable(torch.from_numpy(image_appended.transpose([0,3,1,2])).cuda())   
+            image_appended = torch.cat((image,true_saliency),1)               
 
             feat_extracted = cnn_feat(image_appended)
             # pdb.set_trace()
                 # Performing global average poooling per channel of the image
-            feat_pooled = F.avg_pool2d(feat_extracted,feat_extracted.size()[2:])
+            # feat_pooled = F.avg_pool2d(feat_extracted,feat_extracted.size()[2:])
                 # Reshaping the feature map which is Nx1x1x512 into a vector (Nx512) for passing to LSTM
-            feat_vector = feat_pooled.squeeze()
+            # feat_vector = feat_pooled.squeeze()
             # pdb.set_trace() 
 
-            feat = feat_vector.unsqueeze(1).float()
+            feat_vector = feat_extracted.view(32,512,-1).permute(0,2,1)
+
+            # feat_vector = feat_vector.unsqueeze(1).float()
                 
                 # LSTM 
-            act_out,obj_out = lstm(feat)
+            act_out,obj_out = lstm(feat_vector)
 
             # Creating a one-hot encoded vector for loss comparison
 
@@ -189,15 +190,19 @@ def train(epoch):
             # action_one_hot.scatter_(1,action.data.view(-1,1),1)
             # obj_one_hot.scatter_(1,obj.data.view(-1,1),1)
 
+            
+            # lstm_action_loss = CrossEntropy(act_out,Variable(action_one_hot))
+            # lstm_object_loss = CrossEntropy(obj_out,Variable(obj_one_hot))
+            # pdb.set_trace()
             lstm_action_loss = CrossEntropy(act_out,action.view(-1))
             lstm_object_loss = CrossEntropy(obj_out,obj.view(-1))
 
-            total_loss = lstm_action_loss + lstm_object_loss
+            # total_loss = lstm_action_loss + lstm_object_loss
 
             optimizer.zero_grad()
-            # lstm_action_loss.backward(retain_graph=True)
-            # lstm_object_loss.backward()
-            total_loss.backward()
+            lstm_action_loss.backward(retain_graph=True)
+            lstm_object_loss.backward()
+            # total_loss.backward()
             optimizer.step()
 
             if batch_idx % args.log_interval == 0:
@@ -216,7 +221,7 @@ def train(epoch):
     print('\nAction Accuracy: {}/{} ({:.2f}%)\t Object  Accuracy: {}/{} ({:.2f}%)\n'
                     .format(correct_act, len(trainloader.dataset), 100 * (correct_act / len(trainloader.dataset)), correct_obj,
                                                     len(trainloader.dataset), 100 * (correct_obj / len(trainloader.dataset))))  
-    # pdb.set_trace()  
+    pdb.set_trace()  
 
 for epoch in range(1, args.epochs+1):
     adjust_learning_rate(optimizer, epoch)

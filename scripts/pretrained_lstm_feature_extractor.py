@@ -164,7 +164,8 @@ class LSTM(nn.Module):
 
         self.input_size = 512
         self.hidden_size = 512
-        self.num_layers = 2 
+        self.sequence_length = 192
+        self.num_layers = 1 
         self.bidirectional = 1       
 
         self.lstm = nn.LSTM(input_size=self.input_size, 
@@ -173,24 +174,24 @@ class LSTM(nn.Module):
                             batch_first=False,
                             bidirectional=False)
 
-        self.fc = nn.Linear(self.bidirectional*self.hidden_size,256)
+        self.fc = nn.Linear(self.bidirectional*self.sequence_length*self.hidden_size,256)
         self.fc1 = nn.Linear(256*1,16)
         self.fc2 = nn.Linear(256*1,37)
         self.hidden = self.init_hidden()
         
     def init_hidden(self):
-        return (Variable(torch.randn(self.num_layers, 1, self.hidden_size)).cuda(), # shape is (num_layers,sequence_length,hidden_dim)
-                Variable(torch.randn(self.num_layers, 1, self.hidden_size)).cuda())
+        return (Variable(torch.randn(self.bidirectional*self.num_layers, self.sequence_length, self.hidden_size)).cuda(), # shape is (num_layers,sequence_length,hidden_dim)
+                Variable(torch.randn(self.bidirectional*self.num_layers, self.sequence_length, self.hidden_size)).cuda())
     
     def forward(self, x):
         # hidden = self.init_hidden()
         output, hidden = self.lstm(x, self.hidden)
-
+        # pdb.set_trace()
         intermediate = self.fc(output.view(output.size()[0],-1))
         action_output = self.fc1(intermediate)
         object_output = self.fc2(intermediate)
 
-        action_output = F.softmax(action_output)
-        object_output = F.softmax(object_output)
+        # action_output = F.softmax(action_output)
+        # object_output = F.softmax(object_output)
 
-        return torch.clamp(action_output,0,49688), torch.clamp(object_output,0,49688)
+        return action_output, object_output
