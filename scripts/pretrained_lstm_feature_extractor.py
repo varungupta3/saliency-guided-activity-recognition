@@ -165,13 +165,13 @@ class LSTM(nn.Module):
         self.input_size = 512
         self.hidden_size = 512
         self.num_layers = 2 
-        self.bidirectional = 2       
+        self.bidirectional = 1       
 
         self.lstm = nn.LSTM(input_size=self.input_size, 
                             hidden_size=self.hidden_size,
                             num_layers=self.num_layers,
                             batch_first=False,
-                            bidirectional=True)
+                            bidirectional=False)
 
         self.fc = nn.Linear(self.bidirectional*self.hidden_size,256)
         self.fc1 = nn.Linear(256*1,16)
