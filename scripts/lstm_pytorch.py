@@ -64,7 +64,7 @@ trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuff
 # test_dataloader_obj = CookingSequentialloader(testimages,testmasks)
 # testloader = DataLoader(test_dataloader_obj, batch_size=args.test_batchsize, shuffle=False, num_workers=2)
 
-# pdb.s()
+# pdb.set_trace()
 
 # Choosing a Network Architecture
 # --------------------------------------------------------------
@@ -93,7 +93,7 @@ else:
 
 CrossEntropy = nn.CrossEntropyLoss().cuda()
 # optimizer = optim.SGD(lstm.parameters(), lr=args.lr, momentum = args.momentum, weight_decay = args.wd)
-optimizer = optim.SGD([{'params': cnn_feat.parameters()},{'params': lstm.parameters(),'lr': 3e-4}], lr=args.lr, momentum = args.momentum, weight_decay=args.wd)
+optimizer = optim.RMSprop([{'params': cnn_feat.parameters()},{'params': lstm.parameters(),'lr': 1e-4}], lr=args.lr, momentum = args.momentum, weight_decay=args.wd)
 
 def plot_images(images, pred_saliency):
     for i in np.random.randint(np.shape(images)[0], size=10):
@@ -146,7 +146,7 @@ def train(epoch):
             pred_saliencies = pred_saliency.squeeze().cpu().data.numpy()
                 # Element wise multiplication fixation maps
             image_fixated = images*(np.repeat(pred_saliencies[:,:,:,np.newaxis],3,axis=3))
-            pdb.set_trace()
+            #pdb.set_trace()
 
             if PLOT_FLAG:
                 plot_images(images, pred_saliencies)            
@@ -221,7 +221,7 @@ def train(epoch):
     print('\nAction Accuracy: {}/{} ({:.2f}%)\t Object  Accuracy: {}/{} ({:.2f}%)\n'
                     .format(correct_act, len(trainloader.dataset), 100 * (correct_act / len(trainloader.dataset)), correct_obj,
                                                     len(trainloader.dataset), 100 * (correct_obj / len(trainloader.dataset))))  
-    pdb.set_trace()  
+    #pdb.set_trace()  
 
 for epoch in range(1, args.epochs+1):
     adjust_learning_rate(optimizer, epoch)
