@@ -23,7 +23,7 @@ from pretrained_lstm_feature_extractor import *
 from pretrained_models_pytorch import *
 from config import *
 # from Salicon_loader import *
-from CookingSequenceLoader import *
+from CookingSequenceLoader32 import *
 
 from dataloader_lstm import *
 # import EgoNet
@@ -58,7 +58,7 @@ objectlist = np.load(trainObjectsListPath)
 
     # Load Training Data via dataloader object (dataloader_lstm.py). Data for the network is Images and the ground truth label is saliency map.
 train_dataloader_obj = CookingSequentialLoader(trainimages,trainactions,trainobjects,trainmasks)    
-trainloader = DataLoader(train_dataloader_obj, batch_size=args.batch_size, shuffle=False, num_workers=2,drop_last=True)
+trainloader = DataLoader(train_dataloader_obj, batch_size=1, shuffle=True, num_workers=2,drop_last=True)
   
     # Load Testing Data via dataloader object (dataloader_lstm.py).
 # test_dataloader_obj = CookingSequentialloader(testimages,testmasks)
@@ -82,32 +82,36 @@ if args.predict_saliency:
     # Loading the pretrained weights from the EgoNet Caffe model to the computational graph created by the network above.
     # model.load_state_dict(torch.load('EgoNet.pth')) 
 
-    model = Generator()   
+    model = torch.load('../gen_model_epoch30.pt') 
     if args.cuda:
         model.cuda()   
 
 else:
+    model = torch.load('../gen_model_final.pt')
     cnn_feat = CNNFeatureExtractor()
     if args.cuda:
         cnn_feat.cuda()
+        model.cuda()
 
-CrossEntropy = nn.CrossEntropyLoss().cuda()
+CrossEntropy = nn.NLLLoss().cuda()
 # optimizer = optim.SGD(lstm.parameters(), lr=args.lr, momentum = args.momentum, weight_decay = args.wd)
 optimizer = optim.SGD([{'params': cnn_feat.parameters()},{'params': lstm.parameters(),'lr': 3e-4}], lr=args.lr, momentum = args.momentum, weight_decay=args.wd)
 
-def plot_images(images, pred_saliency):
+def plot_images(images,count):
     for i in np.random.randint(np.shape(images)[0], size=10):
     # for i in range(32):
         fig = plt.figure(i)
-        ax1 = fig.add_subplot(121)
+        ax1 = fig.add_subplot(111)
         surf = ax1.imshow(images[i,:,:,:].astype(np.uint8))
-        ax1.set_title('Image')
+        framename = 'frame{}'.format((count*32)+i)
+        plt.savefig('../frame')
+        # ax1.set_title('Image')
         # ax2 = fig.add_subplot(132)
         # surf = ax2.imshow(true_saliency[i,:,:])
         # ax2.set_title('True Saliency')
-        ax3 = fig.add_subplot(122)
-        surf = ax3.imshow(pred_saliency[i,:,:])
-        ax3.set_title('Predicted Saliency')
+        # ax3 = fig.add_subplot(122)
+        # surf = ax3.imshow(pred_saliency[i,:,:])
+        # ax3.set_title('Predicted Saliency')
 
         # pred_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3))).astype(np.uint8)
         # true_weighted_image = np.multiply(images[26,:,:,:],(np.expand_dims(pred_saliency[26,:,:],axis=3)/255.0)).astype(np.uint8)
@@ -125,6 +129,7 @@ def train(epoch):
         model.eval()
         lstm.train()
     else:
+        model.eval()
         cnn_feat.train()
         lstm.train()
 
@@ -158,26 +163,32 @@ def train(epoch):
             # image_fixated = (images*(np.repeat(true_saliencies[:,:,:,np.newaxis],3,axis=3)))/255.0
             # pdb.set_trace()
 
-            if PLOT_FLAG:
-                plot_images(images, true_saliencies)  
+             
 
-            true_saliency = true_saliency.unsqueeze(1)
+            # true_saliency = (true_saliency*255).unsqueeze(1)
+            # true_saliency = (true_saliency*255)
+            pred_saliency = model(image)
+
+            if PLOT_FLAG:
+                plot_images(images, true_saliencies) 
+
                 # Passing the masked images to extract features using a CNN for LSTM sequence analysis. Will have 512 channels downsampled by a factor of 5 at the end of this.
             # image_fixated = image_fixated.astype(np.float32)
-            
+            # pdb.set_trace()
+            true_saliency = torch.transpose(true_saliency,0,1)
             image_appended = torch.cat((image,true_saliency),1)               
 
-            feat_extracted = cnn_feat(image_appended)
+            # feat_extracted = cnn_feat(image_appended)
             # pdb.set_trace()
                 # Performing global average poooling per channel of the image
-            # feat_pooled = F.avg_pool2d(feat_extracted,feat_extracted.size()[2:])
+            feat_pooled = F.avg_pool2d(feat_extracted,feat_extracted.size()[2:])
                 # Reshaping the feature map which is Nx1x1x512 into a vector (Nx512) for passing to LSTM
-            # feat_vector = feat_pooled.squeeze()
+            feat_vector = feat_pooled.squeeze()
             # pdb.set_trace() 
 
-            feat_vector = feat_extracted.view(32,512,-1).permute(0,2,1)
+            # feat_vector = feat_extracted.view(32,-1).unsqueeze(1)#.permute(0,2,1)
 
-            # feat_vector = feat_vector.unsqueeze(1).float()
+            feat_vector = feat_vector.unsqueeze(1).float()
                 
                 # LSTM 
             act_out,obj_out = lstm(feat_vector)
@@ -203,13 +214,7 @@ def train(epoch):
             lstm_action_loss.backward(retain_graph=True)
             lstm_object_loss.backward()
             # total_loss.backward()
-            optimizer.step()
-
-            if batch_idx % args.log_interval == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAction Loss: {:.6f}\t Object Loss: {:.6f}'.format(
-                    epoch, batch_idx * len(image), len(trainloader.dataset),
-                    100. * batch_idx / len(trainloader), lstm_action_loss.data[0], lstm_object_loss.data[0]))
-            
+            optimizer.step()            
 
             pred_act = act_out.data.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct_act += pred_act.eq(action.data.view_as(pred_act)).cpu().sum()
@@ -217,11 +222,32 @@ def train(epoch):
             pred_obj = obj_out.data.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct_obj += pred_obj.eq(obj.data.view_as(pred_obj)).cpu().sum()
 
-            # pdb.set_trace()       
+            if batch_idx % args.log_interval == 0:
+                # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAction Loss: {:.6f}\t Object Loss: {:.6f}'.format(
+                #     epoch, batch_idx * len(image), len(trainloader.dataset),
+                #     100. * batch_idx / len(trainloader), lstm_action_loss.data[0], lstm_object_loss.data[0]))
+                # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAction Accuracy: {:.0f}\t Object Accuracy: {:.0f}'.format(
+                #     epoch, batch_idx * len(image), len(trainloader.dataset),
+                #     100. * batch_idx / len(trainloader), pred_act.eq(action.data.view_as(pred_act)).cpu().sum(),
+                #     pred_obj.eq(obj.data.view_as(pred_obj)).cpu().sum()))
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAction Loss: {:.6f}\t Object Loss: {:.6f}'.format(
+                    epoch, batch_idx, len(trainloader.dataset),
+                    100. * batch_idx / len(trainloader), lstm_action_loss.data[0], lstm_object_loss.data[0]))
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAction Accuracy: {:.0f}\t Object Accuracy: {:.0f}'.format(
+                    epoch, batch_idx, len(trainloader.dataset),
+                    100. * batch_idx / len(trainloader), pred_act.eq(action.data.view_as(pred_act)).cpu().sum(),
+                    pred_obj.eq(obj.data.view_as(pred_obj)).cpu().sum()))
+
+            # pdb.set_trace() 
+
+    # print('\nAction Accuracy: {}/{} ({:.2f}%)\t Object  Accuracy: {}/{} ({:.2f}%)\n'
+    #                 .format(correct_act, len(trainloader.dataset), 100 * (correct_act / len(trainloader.dataset)), correct_obj,
+    #                                                 len(trainloader.dataset), 100 * (correct_obj / len(trainloader.dataset))))
     print('\nAction Accuracy: {}/{} ({:.2f}%)\t Object  Accuracy: {}/{} ({:.2f}%)\n'
-                    .format(correct_act, len(trainloader.dataset), 100 * (correct_act / len(trainloader.dataset)), correct_obj,
-                                                    len(trainloader.dataset), 100 * (correct_obj / len(trainloader.dataset))))  
-    pdb.set_trace()  
+                    .format(correct_act/32., len(trainloader.dataset), 100 * (correct_act / (32.*len(trainloader.dataset))), correct_obj/32.,
+                                                    len(trainloader.dataset), 100 * (correct_obj / (32.*len(trainloader.dataset)))))  
+    if epoch >= 32:
+        pdb.set_trace()  
 
 for epoch in range(1, args.epochs+1):
     adjust_learning_rate(optimizer, epoch)

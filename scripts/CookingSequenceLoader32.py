@@ -22,16 +22,17 @@ class CookingSequentialLoader(Dataset):
         
         self.mean_val = bgr_mean
         # self.std = np.std(img,axis=0)
+        index = np.random.choice(self.images.shape[0]-32,1)[0]
 
-        img = self.images[index,:,:,:]
-        img = img[::-1,:,:]      
+        img = self.images[index:index+32,:,:,:]
+        img = img[:,::-1,:,:]      
         
 
         # use broadcasting to vectorizely normalize image
         img = (img - self.mean_val.reshape(1,3,1,1))#/(self.std.reshape(1,3,1,1))
-        act = self.actions[index].reshape(-1,)
-        obj = self.objects[index].reshape(-1,)
-        saliency = self.saliency[index,:,:]
+        act = self.actions[index:index+32].reshape(-1,)
+        obj = self.objects[index:index+32].reshape(-1,)
+        saliency = self.saliency[index:index+32,:,:]
 
         # convert numpy array to torch tensor variable
         img = torch.from_numpy(img.astype(np.float32))
@@ -45,8 +46,8 @@ class CookingSequentialLoader(Dataset):
         #this function define the upper bound of input index
         #it's usually set to the data image number
 
-        # return self.images.shape[0]
-        return 2000
+        # return self.images.shape[0]-32
+        return 100
 
 
 # class SubsetRandomSampler(Sampler):

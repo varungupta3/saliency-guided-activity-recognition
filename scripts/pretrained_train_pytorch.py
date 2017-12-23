@@ -60,8 +60,8 @@ print (" 2.1 --> Building the network with Salgan model")
         # Deploying the generator network model from models-pytorch.py
 
 # g1_net = Generator()
-g_net = torch.load('../gen_model_mid.pt')
-d_net = torch.load('../disc_model_mid.pt')
+g_net = torch.load('../gen_model_final.pt')
+d_net = torch.load('../disc_model_final.pt')
 
 # g_net = torch.load('../gen_model_epoch30.pt')
 # d_net = torch.load('../disc_model_epoch30.pt')
